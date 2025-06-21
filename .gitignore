@@ -1,0 +1,49 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Logs
+*.log
+transactions.log
+
+# dotenv
+.env
+
+# Test output
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+.cache
+
+# IDE/editor files
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+*.DS_Store
+.idea/
+.vscode/
+*.code-workspace
+
+# Python package files
+build/
+dist/
+*.egg-info/
+
+# Main account data
+data/config.py
+
+# OS-specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
