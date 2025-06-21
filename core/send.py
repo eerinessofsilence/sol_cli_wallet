@@ -11,56 +11,61 @@ from solders.hash import Hash
 from solana.rpc.async_api import AsyncClient
 from solana.rpc.types import TxOpts
 
+async def lamport_to_sol(lamports: int) -> float:
+    """Convert lamports to SOL."""
+    return lamports / 1_000_000_000
+
 async def send_transaction(
     client: AsyncClient,
     sender: Keypair,
     receiver: Pubkey,
-    lamports: int = 1_000_000  # 1 SOL = 1_000_000_000 lamports
+    lamports: int = 1_000_000 # 0.001 SOL, default value
 ) -> str:
-    # Получаем последний блокхеш
     bh_resp = await client.get_latest_blockhash()
-    recent_blockhash = bh_resp.value.blockhash
-
-    # Создаем инструкцию (transfer)
+    recent_blockhash: Hash = bh_resp.value.blockhash
     SYSTEM_PROGRAM_ID = Pubkey.from_string("11111111111111111111111111111111")
+
     instruction = Instruction(
         program_id=SYSTEM_PROGRAM_ID,
         accounts=[
-            AccountMeta(public_key=sender.public_key(), is_signer=True, is_writable=True),
-            AccountMeta(public_key=receiver, is_signer=False, is_writable=True),
+            AccountMeta(pubkey=sender.pubkey(), is_signer=True, is_writable=True),
+            AccountMeta(pubkey=receiver, is_signer=False, is_writable=True),
         ],
-        data=bytes([2]) + lamports.to_bytes(8, "little")
+        data=(2).to_bytes(4, "little") + lamports.to_bytes(8, "little")
     )
 
-    # Создаем сообщение и транзакцию
-    message = Message([instruction], sender.public_key(), recent_blockhash)
+    message = Message([instruction], sender.pubkey())
     tx = Transaction([sender], message, recent_blockhash)
 
-    # Отправляем в сеть
     resp = await client.send_raw_transaction(bytes(tx), opts=TxOpts(skip_preflight=True))
-    print("✅ Signature:", resp.value)
+    print("[✓] Signature:", resp.value)
+    return resp.value
 
-    await client.close()
-
-        
-async def send_from_wallet(account_from: dict, account_to: dict):
+async def send_from_wallet(wallet_from, wallet_to):
+    account = wallet_to["wallet_to"]
+    amount = wallet_to["amount"]
+    receiver = Pubkey.from_string(account["pubkey"])
     RPC_URL = os.getenv("RPC_URL", "https://api.mainnet-beta.solana.com")
-
+    
     async with AsyncClient(RPC_URL) as client:
-        transaction = await send_transaction(client=client, 
-                                             sender=Keypair.from_secret_key(account_from["private_key"]),
-                                             receiver=Pubkey.from_string(account_to["public_key"]))
-        logger.info(f"{transaction}")  
+        await send_transaction(
+            client=client,
+            sender=Keypair.from_base58_string(wallet_from["privkey"]),
+            receiver=receiver,
+        )
+        await asyncio.sleep(3) 
+        balance = await client.get_balance(receiver)
+        print("[•] Receiver balance:", await lamport_to_sol(balance.value), "SOL")
             
 async def send_to_single_wallet():
     RPC_URL = os.getenv("RPC_URL", "https://api.mainnet-beta.solana.com")
-    accounts = config.WALLETS
-    public_keys = [account["public_key"] for account in accounts if account["public_key"]]
+    wallets = config.WALLETS
+    pubkeys = [wallet["pubkey"] for wallet in wallets if wallet["pubkey"]]
 
     async with AsyncClient(RPC_URL) as client:
-        tasks = [send_transaction(client, public_key) for public_key in public_keys]
+        tasks = [send_transaction(client, pubkey) for pubkey in pubkeys]
         transactions = await asyncio.gather(*tasks)
 
-        for account, transaction in zip(accounts, transactions):
-            public_key = account["public_key"]
-            logger.info(f"{public_key}: {transaction} lamports")
+        for wallet, transaction in zip(wallets, transactions):
+            pubkey = wallet["pubkey"]
+            logger.info(f"{pubkey}: {transaction} lamports")

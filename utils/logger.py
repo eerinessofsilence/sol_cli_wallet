@@ -4,7 +4,7 @@ import sys
 class ColoredFormatter(logging.Formatter):
     COLORS = {
         logging.DEBUG: "\033[37m",    # Белый
-        logging.INFO: "\033[32m",     # Голубой
+        logging.INFO: "\033[38;2;93;172;250m",     # Голубой
         logging.WARNING: "\033[33m",  # Жёлтый
         logging.ERROR: "\033[31m",    # Красный
         logging.CRITICAL: "\033[41m", # Красный фон
@@ -19,7 +19,7 @@ class ColoredFormatter(logging.Formatter):
 logger = logging.getLogger("sol_cli_wallet")
 logger.setLevel(logging.INFO)
 
-fmt = "%(asctime)s %(levelname)s ▶ %(message)s"
+fmt = "[•] %(asctime)s | %(message)s"
 formatter = logging.Formatter(fmt, datefmt="%H:%M:%S")
 
 colored_formatter = ColoredFormatter(fmt, datefmt="%H:%M:%S")
