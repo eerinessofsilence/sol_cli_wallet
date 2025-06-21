@@ -42,6 +42,7 @@ dist/
 
 # Main account data
 data/config.py
+run.sh
 
 # OS-specific
 Thumbs.db
