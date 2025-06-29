@@ -1,27 +1,41 @@
-import os
 import asyncio
+
+from typing import List
 from solana.rpc.async_api import AsyncClient
 from solders.pubkey import Pubkey
+
 from data import config
 from utils.logger import logger
 
-async def get_balance(client, pubkey_str: str) -> int:
+LAMPORTS_PER_SOL = 1_000_000_000
+
+async def get_balance_safe(client: AsyncClient, pubkey: Pubkey) -> float:
+    try:
+        resp = await client.get_balance(pubkey)
+        value = resp.value
+        if value is None:
+            logger.warning(f"No balance returned for {str(pubkey)}")
+            return 0.0
+        return value / LAMPORTS_PER_SOL
+    except Exception as e:
+        logger.error(f"Failed to fetch balance for {str(pubkey)}: {e}")
+        return 0.0
+
+async def show_single_wallet_balance(client: AsyncClient, wallet: dict):
+    pubkey_str = wallet.get("pubkey")
+    if not pubkey_str:
+        logger.error("Wallet has no pubkey.")
+        return
     pubkey = Pubkey.from_string(pubkey_str)
-    resp = await client.get_balance(pubkey)
-    return resp.value / 1_000_000_000
+    balance = await get_balance_safe(client, pubkey)
+    logger.info(f"[{wallet.get('name', 'Unnamed')}] {pubkey_str}: {balance:.6f} SOL")
 
-async def show_wallet_balance(wallet: dict):
-    RPC_URL = os.getenv("RPC_URL", "https://api.mainnet-beta.solana.com")
-    pubkey_str = wallet["pubkey"]
-
-    async with AsyncClient(RPC_URL) as client:
-        balance = await get_balance(client, pubkey_str)
-        logger.info(f"{pubkey_str}: {balance} SOL")
-        
-async def show_all_wallets_balance():
-    RPC_URL = os.getenv("RPC_URL", "https://api.mainnet-beta.solana.com")
-    pubkeys_str = [wallet["pubkey"] for wallet in config.WALLETS if wallet["pubkey"]]
-    async with AsyncClient(RPC_URL) as client:
-        tasks = [get_balance(client, pubkey_str) for pubkey_str in pubkeys_str]
-        balances = await asyncio.gather(*tasks)
-        logger.info(f"Total balance of all wallets: {sum(balances)} SOL")
+async def show_all_wallet_balances(client: AsyncClient):
+    wallets: List[dict] = config.WALLETS
+    pubkeys = [
+        Pubkey.from_string(wallet["pubkey"]) for wallet in wallets if wallet.get("pubkey")
+    ]
+    tasks = [get_balance_safe(client, pubkey) for pubkey in pubkeys]
+    balances = await asyncio.gather(*tasks)
+    total = sum(balances)
+    logger.info(f"Total balance of all wallets: {total:.6f} SOL")

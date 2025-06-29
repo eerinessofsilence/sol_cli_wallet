@@ -1,23 +1,26 @@
 # 🪙 Solana CLI Wallet (Python)
 
-Консольный кошелёк для работы с Solana без использования сторонних GUI-кошельков.
+A command-line wallet for working with Solana without using third-party GUI wallets.
 
 ---
 
-## 📦 Возможности
+## 📦 Features
 
-- Импорт приватных ключей (base58 / JSON-массив).
-- Просмотр баланса SOL, SPL-токенов, NFT.
-- Отправка SOL, токенов, NFT.
-- Массовая (batch) отправка.
-- Расшифровка токенов по метаданным (Metaplex).
-- Безопасность: ключи только в ОЗУ, опциональное шифрование.
-- Работа через RPC без Phantom/MetaMask.
-- Конфигурация сети через `.env`.
+- Import private keys (base58 / JSON array).
+- View SOL balance, SPL tokens, NFTs.
+- Send SOL, tokens, NFTs.
+- Batch (mass) sending.
+- Security: keys only in RAM, optional encryption.
+- Works via RPC without Phantom/MetaMask.
+- Network configuration via `.env`.
 
 ---
 
-## 🔧 Установка
+## 🔧 Installation
+
+### ⚙️ Requirements
+
+- Python 3.11+
 
 ### 🐧 Linux / 🍎 MacOS
 
@@ -25,6 +28,18 @@
 git clone https://github.com/eerinessofsilence/solana-cli-wallet
 cd solana-cli-wallet
 python3 -m venv venv
-pip install -r requirements.txt
+source venv/bin/activate
+pip3 install -r requirements.txt
 python3 main.py
+```
+
+### 🪟 Windows
+
+```bash
+git clone https://github.com/eerinessofsilence/solana-cli-wallet
+cd solana-cli-wallet
+python -m venv venv
+.\venv\Scripts\activate
+pip install -r requirements.txt
+python main.py
 ```
