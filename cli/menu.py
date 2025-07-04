@@ -59,7 +59,7 @@ async def manage_menu() -> tuple[str, dict]:
     choice = await inquirer.select(
         message="Select mode:",
         choices=[
-            {"name": "Show wallet balances", "value": "show_balance_menu"},
+            {"name": "Show SOL", "value": "show_sol_menu"},
             {"name": "Send SOL", "value": "send_sol_menu"},
             {"name": "Back", "value": "back"},
         ],
@@ -69,12 +69,12 @@ async def manage_menu() -> tuple[str, dict]:
 
     if choice == "back":
         return await main_menu()
-    elif choice == "show_balance_menu":
-        return await show_balance_menu()
+    elif choice == "show_sol_menu":
+        return await show_sol_menu()
     elif choice == "send_sol_menu":
         return await send_sol_menu()
 
-async def show_balance_menu():
+async def show_sol_menu():
     choice = await inquirer.select(
         message="Select mode:",
         choices=[
@@ -98,9 +98,7 @@ async def send_sol_menu():
         message="Select mode:",
         choices=[
             {"name": "Send to single wallet", "value": "send_to_single_wallet"},
-            {"name": "Send to all wallets", "value": "send_to_all_wallets"},
             {"name": "Send to multiple wallets", "value": "send_to_multiple_wallets"},
-            {"name": "Send from all wallets", "value": "send_from_all_wallets"},
             {"name": "Send from multiple wallets", "value": "send_from_multiple_wallets"},
             {"name": "Back", "value": "back"},
         ],
@@ -146,14 +144,14 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
             return mode, wallet_choice, None, None
         
     elif mode == "send_to_single_wallet":
-        wallets = [
+        wallet_from_choices = [
             {"name": f"[•] {wallet['name']}: {wallet['pubkey']}", "value": wallet}
             for wallet in config.WALLETS
         ]
-        wallets.append({"name": "Back", "value": "back"})
+        wallet_from_choices.append({"name": "Back", "value": "back"})
         wallet_from = await inquirer.select(
             message="Select wallet to send from:",
-            choices=wallets,
+            choices=wallet_from_choices,
             pointer="❯",
             instruction="(↑ up • ↓ down • enter submit)",
         ).execute_async()
@@ -161,10 +159,10 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
         if wallet_from == "back":
             return await manage_menu()
         
-        wallets = [w for w in wallets if not (isinstance(wallet_from, dict) and isinstance(w["value"], dict) and w["value"].get("pubkey") == wallet_from.get("pubkey"))]
+        wallets_to = [w for w in wallet_from_choices if not (isinstance(wallet_from, dict) and isinstance(w["value"], dict) and w["value"].get("pubkey") == wallet_from.get("pubkey"))]
         wallet_to = await inquirer.select(
             message="Select wallet to send to:",
-            choices=wallets,
+            choices=wallets_to,
             pointer="❯",
             instruction="(↑ up • ↓ down • enter submit)",
         ).execute_async()
@@ -181,115 +179,90 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
         sol_amount = amount_input if "%" in amount_input else float(amount_input)
     
         return mode, wallet_from, wallet_to, sol_amount
-    
-    elif mode == "send_to_all_wallets":
-        wallets = [
-            {"name": f"[•] {wallet['name']}: {wallet['pubkey']}", "value": wallet}
-            for wallet in config.WALLETS
-        ]
-        wallets.append({"name": "Back", "value": "back"})
-        wallet_from = await inquirer.select(
-            message="Select wallet to send from:",
-            choices=wallets,
-            pointer="❯",
-            instruction="(↑ up • ↓ down • enter submit)",
-        ).execute_async()
-
-        if wallet_from == "back":
-            return await manage_menu()
-
-        amount_input = await inquirer.text(
-            message="Enter amount of SOL to send:",
-            validate=validate_amount,
-            invalid_message="Enter a valid amount: a number > 0.000005 or a percentage (0-100%) like 50%.",
-            instruction="(e.g. 0.1 or 50% for percentage of balance)",
-        ).execute_async()
-        sol_amount = amount_input
-
-        return mode, wallet_from, config.WALLETS, sol_amount
         
     elif mode == "send_to_multiple_wallets":
-        wallets = [
-            {"name": f"[•] {wallet['name']}: {wallet['pubkey']}", "value": wallet}
-            for wallet in config.WALLETS
-        ]
-        wallets.append({"name": "Back", "value": "back"})
-        wallet_from = await inquirer.select(
-            message="Select wallet to send from:",
-            choices=wallets,
+        choice = await inquirer.select(
+            message="Select action",
+            choices=[
+                {"name": "All wallets", "value": "all_wallets"},
+                {"name": "Multiple wallets", "value": "multiple_wallets"},
+                {"name": "Back", "value": "back"},
+            ],
             pointer="❯",
             instruction="(↑ up • ↓ down • enter submit)",
         ).execute_async()
+        
+        if choice == "all_wallets":       
+            wallet_from_choices = [
+                {"name": f"[•] {wallet['name']}: {wallet['pubkey']}", "value": wallet}
+                for wallet in config.WALLETS
+            ]
+            wallet_from_choices.append({"name": "Back", "value": "back"})
+            wallet_from = await inquirer.select(
+                message="Select wallet to send from:",
+                choices=wallet_from_choices,
+                pointer="❯",
+                instruction="(↑ up • ↓ down • enter submit)",
+            ).execute_async()
 
-        if wallet_from == "back":
+            if wallet_from == "back":
+                return await manage_menu()
+
+            wallets_to = config.WALLETS
+
+            amount_input = await inquirer.text(
+                message="Enter amount of SOL to send:",
+                validate=validate_amount,
+                invalid_message="Enter a valid amount: a number > 0.000005 or a percentage (0-100%) like 50%.",
+                instruction="(e.g. 0.1 or 50% for percentage of balance)",
+            ).execute_async()
+            sol_amount = amount_input
+
+            return mode, wallet_from, wallets_to, sol_amount
+        
+        elif choice == "multiple_wallets":
+            wallet_from_choices = [
+                {"name": f"[•] {wallet['name']}: {wallet['pubkey']}", "value": wallet}
+                for wallet in config.WALLETS
+            ]
+            wallet_from_choices.append({"name": "Back", "value": "back"})
+            wallet_from = await inquirer.select(
+                message="Select wallet to send from:",
+                choices=wallet_from_choices,
+                pointer="❯",
+                instruction="(↑ up • ↓ down • enter submit)",
+            ).execute_async()
+
+            if wallet_from == "back":
+                return await manage_menu()
+
+            wallets_to_choices = [
+                w for w in wallet_from_choices
+                if w["value"] != "back" and w["value"].get("pubkey") != wallet_from.get("pubkey")
+            ]
+            wallets_to = await inquirer.checkbox(
+                message="Select wallet to send from:",
+                choices=wallets_to_choices,
+                pointer="❯",
+                instruction="(↑ up • ↓ down • space select • enter submit)",
+            ).execute_async()
+            
+            if wallets_to == []:
+                return await manage_menu()
+            
+            amount_input = await inquirer.text(
+                message="Enter amount of SOL to send:",
+                validate=validate_amount,
+                invalid_message="Enter a valid amount: a number > 0.000005 or a percentage (0-100%) like 50%.",
+                instruction="(e.g. 0.1 or 50% for percentage of balance)",
+            ).execute_async()
+            sol_amount = amount_input
+
+            return mode, wallet_from, wallets_to, sol_amount
+        
+        else:
             return await manage_menu()
         
-        wallets = [w for w in wallets if not (isinstance(wallet_from, dict) and isinstance(w["value"], dict) and w["value"].get("pubkey") == wallet_from.get("pubkey"))]
-        wallet_to = await inquirer.select(
-            message="Select wallet to send to:",
-            choices=wallets,
-            pointer="❯",
-            instruction="(↑ up • ↓ down • enter submit)",
-        ).execute_async()
-
-        if wallet_to == "back":
-            return await manage_menu()
-        
-        amount_input = await inquirer.text(
-            message="Enter amount of SOL to send:",
-            validate=lambda x: (
-            (x.endswith('%') and x[:-1].replace('.', '', 1).isdigit() and 0 < float(x[:-1]) <= 100)
-            or (x.replace('.', '', 1).isdigit() and float(x) > 0.000005)
-            or x == ""
-            ),
-            invalid_message="Enter a valid amount, percentage must be between 0 and 100, or a valid SOL amount greater than 0.000005.",
-            instruction="(e.g. 0.1 or 50% for percentage of balance)",
-        ).execute_async()
-        sol_amount = amount_input
-
-        return mode, wallet_from, wallet_to, sol_amount
-    
-    elif mode == "send_from_all_wallets":
-        wallets = [
-            {"name": f"[•] {wallet['name']}: {wallet['pubkey']}", "value": wallet}
-            for wallet in config.WALLETS
-        ]
-        wallets.append({"name": "Back", "value": "back"})
-        wallet_from = await inquirer.select(
-            message="Select wallet to send from:",
-            choices=wallets,
-            pointer="❯",
-            instruction="(↑ up • ↓ down • enter submit)",
-        ).execute_async()
-
-        if wallet_from == "back":
-            return await manage_menu()
-        
-        wallets = [w for w in wallets if not (isinstance(wallet_from, dict) and isinstance(w["value"], dict) and w["value"].get("pubkey") == wallet_from.get("pubkey"))]
-        wallet_to = await inquirer.select(
-            message="Select wallet to send to:",
-            choices=wallets,
-            pointer="❯",
-            instruction="(↑ up • ↓ down • enter submit)",
-        ).execute_async()
-
-        if wallet_to == "back":
-            return await manage_menu()
-        
-        amount_input = await inquirer.text(
-            message="Enter amount of SOL to send:",
-            validate=lambda x: (
-            (x.endswith('%') and x[:-1].replace('.', '', 1).isdigit() and 0 < float(x[:-1]) <= 100)
-            or (x.replace('.', '', 1).isdigit() and float(x) > 0.000005)
-            or x == ""
-            ),
-            invalid_message="Enter a valid amount, percentage must be between 0 and 100, or a valid SOL amount greater than 0.000005.",
-            instruction="(e.g. 0.1 or 50% for percentage of balance)",
-        ).execute_async()
-        sol_amount = amount_input
-
-        return mode, wallet_from, wallet_to, sol_amount
-    
     elif mode == "send_from_multiple_wallets":
         wallets = [
             {"name": f"[•] {wallet['name']}: {wallet['pubkey']}", "value": wallet}

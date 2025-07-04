@@ -11,8 +11,11 @@ RPC_URL = os.getenv("RPC_URL", "https://api.mainnet-beta.solana.com")
 
 async def main():
     result = await main_menu()
-    mode, wallet_from, wallet_to, sol_amount = (list(result) + [None] * 4)[:4]
+    if not result:
+        print("No result from main_menu.")
+        return
 
+    mode, wallet_from, wallet_to, sol_amount = (list(result) + [None] * 4)[:4]
     async with AsyncClient(RPC_URL) as client:
         await handle_mode(mode, wallet_from, wallet_to, sol_amount, client)
 

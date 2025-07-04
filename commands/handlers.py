@@ -1,6 +1,5 @@
 from core.show import show_single_wallet_balance, show_all_wallet_balances
-from core.send import send_to_single_wallet, send_to_all_wallets, \
-                      send_to_multiple_wallets, send_from_all_wallets, \
+from core.send import send_to_single_wallet, send_to_multiple_wallets, \
                       send_from_multiple_wallets
                       
 from rich.console import Console
@@ -11,7 +10,7 @@ async def handle_mode(mode, wallet_from, wallet_to, sol_amount, client):
     """Handle the selected mode and execute the corresponding function."""
     
     
-    # SHOW wallet balances
+    # SHOW SOL wallet balances
     if mode == "show_single_wallet_balance":
         await show_single_wallet_balance(client, wallet_from)
 
@@ -22,15 +21,9 @@ async def handle_mode(mode, wallet_from, wallet_to, sol_amount, client):
     # SEND SOL to/from wallets
     elif mode == "send_to_single_wallet":
         await send_to_single_wallet(client, wallet_from, wallet_to, sol_amount)
-
-    elif mode == "send_to_all_wallets":
-        await send_to_all_wallets(client, wallet_from, wallet_to, sol_amount)
             
     elif mode == "send_to_multiple_wallets":
         await send_to_multiple_wallets(client, wallet_from, wallet_to, sol_amount)
-            
-    elif mode == "send_from_all_wallets":
-        await send_from_all_wallets(client, wallet_from, wallet_to, sol_amount)
             
     elif mode == "send_from_multiple_wallets":
         await send_from_multiple_wallets(client, wallet_from, wallet_to, sol_amount)

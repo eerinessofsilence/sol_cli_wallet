@@ -44,8 +44,6 @@ async def calculate_lamports_to_send(
         return None
     return lamports
 
-# MAIN
-
 async def send_transaction(
     client: AsyncClient,
     sender: Keypair,
@@ -70,6 +68,8 @@ async def send_transaction(
 
     resp = await client.send_raw_transaction(bytes(tx), opts=TxOpts(skip_preflight=True))
     return resp.value
+
+### MAIN
 
 async def send_to_single_wallet(
     client: AsyncClient,
@@ -108,7 +108,7 @@ async def send_to_single_wallet(
             return
         
         if waiting_for_confirmation:
-            for _ in range(30):  # timeout ~30s
+            for _ in range(30):
                 new_balance = await client.get_balance(receiver)
                 if new_balance.value != old_balance.value:
                     logger.success("Transaction confirmed.")
@@ -117,14 +117,14 @@ async def send_to_single_wallet(
                 await asyncio.sleep(1)
             else:
                 logger.warning("Transaction not confirmed after 30s.")
-        
-async def send_to_all_wallets(
+
+async def send_to_multiple_wallets(
     client: AsyncClient,
     wallet_from: dict,
     wallet_to: list[dict],
     sol_amount: float | str,
-) -> None:
-    """Sends SOL from single wallet to all wallets."""
+) -> None:  
+    """Sends SOL from single wallet to multiple wallets."""       
     
     sender = Keypair.from_base58_string(wallet_from["privkey"])
     wallets = [w for w in wallet_to if w['pubkey'] != str(sender.pubkey())]
@@ -159,25 +159,6 @@ async def send_to_all_wallets(
 
 
 
-
-
-async def send_to_multiple_wallets(
-    client: AsyncClient,
-    wallet_from: dict,
-    wallet_to: list[dict],
-) -> None:  
-    """Sends SOL from single wallet to multiple wallets."""       
-    
-    pass
-
-async def send_from_all_wallets(
-    client: AsyncClient,
-    wallet_from: list[dict] , 
-    wallet_to: dict, 
-) -> None:
-    """Sends SOL from all wallets to a single wallet."""
-    
-    pass
 
 async def send_from_multiple_wallets(
     client: AsyncClient,
