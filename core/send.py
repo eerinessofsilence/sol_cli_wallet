@@ -179,9 +179,12 @@ async def send_from_multiple_wallets(
 async def split_balance_equally(
     client: AsyncClient,
     wallets_from: list[dict],
-    wallet_to: list[dict],
+    wallets_to: list[dict],
     sol_amount: float | str
 ) -> None:
     """Splits SOL balance equaly for multiple wallets"""
     
-    pass
+    receivers = [Keypair.from_base58_string(wallet_to["privkey"]) for wallet_to in wallets_to]
+    senders = [Keypair.from_base58_string(wallet_from["privkey"]) for wallet_from in wallets_from]
+    
+    total_balance = ...
