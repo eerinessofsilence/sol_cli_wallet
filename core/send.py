@@ -11,7 +11,9 @@ from solana.rpc.types import TxOpts
 
 from utils.logger import logger
 
-# UTILS
+
+
+### UTILS
 def sol_to_lamports(sol: float | str) -> int:
     """Converts SOL to lamports."""
     
@@ -69,8 +71,9 @@ async def send_transaction(
     resp = await client.send_raw_transaction(bytes(tx), opts=TxOpts(skip_preflight=True))
     return resp.value
 
-### MAIN
 
+
+### MAIN
 async def send_to_single_wallet(
     client: AsyncClient,
     wallet_from: dict, 
@@ -82,7 +85,6 @@ async def send_to_single_wallet(
     
     sender = Keypair.from_base58_string(wallet_from["privkey"])
     receiver = Pubkey.from_string(wallet_to["pubkey"])
-    
     lamports = await calculate_lamports_to_send(client, sender.pubkey(), sol_amount)
 
     if lamports:
@@ -121,18 +123,18 @@ async def send_to_single_wallet(
 async def send_to_multiple_wallets(
     client: AsyncClient,
     wallet_from: dict,
-    wallet_to: list[dict],
+    wallets_to: list[dict],
     sol_amount: float | str,
 ) -> None:  
     """Sends SOL from single wallet to multiple wallets."""       
     
     sender = Keypair.from_base58_string(wallet_from["privkey"])
-    wallets = [w for w in wallet_to if w['pubkey'] != str(sender.pubkey())]
+    wallets_to = [w for w in wallets_to if w['pubkey'] != str(sender.pubkey())]
     
     lamports = await calculate_lamports_to_send(client, sender.pubkey(), sol_amount)
 
     if lamports:
-        amount_of_wallets: int = len(wallets)
+        amount_of_wallets: int = len(wallets_to)
         sender_balance_lamports: int = await client.get_balance(sender.pubkey())
         total_lamports_amount: int = lamports * amount_of_wallets
         
@@ -140,7 +142,7 @@ async def send_to_multiple_wallets(
             logger.info(f"Sending {sol_amount} SOL to {amount_of_wallets} wallets.")
             logger.info(f"Total amount to send: {lamports_to_sol(total_lamports_amount)} SOL")
 
-            tasks = [send_to_single_wallet(client, wallet_from, wallet, sol_amount, waiting_for_confirmation=False) for wallet in wallets]
+            tasks = [send_to_single_wallet(client, wallet_from, wallet_to, sol_amount, waiting_for_confirmation=False) for wallet_to in wallets_to]
             await asyncio.gather(*tasks)
 
         else:
@@ -149,22 +151,37 @@ async def send_to_multiple_wallets(
                 f"available {lamports_to_sol(sender_balance_lamports.value):.6f} SOL."
             )
 
-
-
-
-
-
-
-
-
-
-
-
 async def send_from_multiple_wallets(
     client: AsyncClient,
-    wallet_from: list[dict], 
-    wallet_to: dict, 
+    wallets_from: list[dict],
+    wallet_to: dict,
+    sol_amount: float | str
 ) -> None:
     """Sends SOL from multiple wallets to a single wallet."""
+    
+    receiver = Keypair.from_base58_string(wallet_to["privkey"])
+    senders = [Keypair.from_base58_string(wallet_from["privkey"]) 
+                for wallet_from in wallets_from 
+                if wallet_from["pubkey"] != receiver.pubkey()]
+    for sender in senders:
+        lamports = await calculate_lamports_to_send(client, sender.pubkey(), sol_amount)
+        if not lamports:
+            return
+    
+    amount_of_wallets = len(wallets_from)
+    total_lamports_amount = lamports * amount_of_wallets 
+    logger.info(f"Sending {sol_amount} SOL to {amount_of_wallets} wallets.")
+    logger.info(f"Total amount to send: {lamports_to_sol(total_lamports_amount)} SOL")
+
+    tasks = [send_to_single_wallet(client, wallet_from, wallet_to, sol_amount, waiting_for_confirmation=False) for wallet_from in wallets_from]
+    await asyncio.gather(*tasks)
+    
+async def split_balance_equally(
+    client: AsyncClient,
+    wallets_from: list[dict],
+    wallet_to: list[dict],
+    sol_amount: float | str
+) -> None:
+    """Splits SOL balance equaly for multiple wallets"""
     
     pass
