@@ -1,9 +1,10 @@
 import asyncio
+import os
+
 from utils.logger import logger
 from cli.menu import main_menu
 from commands.handlers import handle_mode
 from solana.rpc.async_api import AsyncClient
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,7 +18,7 @@ async def main():
 
     mode, wallet_from, wallet_to, sol_amount = (list(result) + [None] * 4)[:4]
     async with AsyncClient(RPC_URL) as client:
-        await handle_mode(mode, wallet_from, wallet_to, sol_amount, client)
+        await handle_mode(mode, client, wallet_from, wallet_to, sol_amount)
 
 if __name__ == "__main__":
     try:

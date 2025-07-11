@@ -100,6 +100,7 @@ async def send_sol_menu():
             {"name": "Send to single wallet", "value": "send_to_single_wallet"},
             {"name": "Send to multiple wallets", "value": "send_to_multiple_wallets"},
             {"name": "Send from multiple wallets", "value": "send_from_multiple_wallets"},
+            {"name": "Split balance equally", "value": "split_balance_equally"},
             {"name": "Back", "value": "back"},
         ],
         pointer="❯",
@@ -331,5 +332,36 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
         
         else:
             return await send_sol_menu()
+        
+    elif mode == "split_balance_equally":
+        choice = await inquirer.select(
+            message="Select action",
+            choices=[
+                {"name": "All wallets", "value": "all_wallets"},
+                {"name": "Multiple wallets", "value": "multiple_wallets"},
+                {"name": "Back", "value": "back"},
+            ],
+            pointer="❯",
+            instruction="(↑ up • ↓ down • enter submit)",
+        ).execute_async()
+        
+        if choice == "all_wallets":       
+            wallets = config.WALLETS
+            
+            return mode, wallets
+        
+        elif choice == "multiple_wallets":   
+            wallets_choices = [
+                {"name": f"[•] {wallet['name']}: {wallet['pubkey']}", "value": wallet}
+                for wallet in config.WALLETS
+            ]
+            wallets = await inquirer.checkbox(
+                message="Choose source wallets:",
+                choices=wallets_choices,
+                pointer="❯",
+                instruction="(↑ up • ↓ down • enter submit)",
+            ).execute_async()
+            
+            return mode, wallets
         
     return (None, None, None, None)

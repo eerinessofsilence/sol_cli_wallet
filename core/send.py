@@ -14,6 +14,8 @@ from utils.logger import logger
 
 
 ### UTILS
+TRANSACTION_FEE: int = 5000
+
 def sol_to_lamports(sol: float | str) -> int:
     """Converts SOL to lamports."""
     
@@ -29,7 +31,7 @@ async def calculate_lamports_to_send(
     pubkey: Pubkey, 
     sol_amount: float | str
 ) -> int | None:
-    """Checks user balance and calculates lamports."""
+    """Checks user balance and calculates lamports and transaction fee."""
     
     balance = await client.get_balance(pubkey)
     if isinstance(sol_amount, str) and sol_amount.endswith('%'):
@@ -38,13 +40,22 @@ async def calculate_lamports_to_send(
     else:
         lamports = sol_to_lamports(sol_amount)
 
-    if lamports >= balance.value:
+    if balance.value < lamports + TRANSACTION_FEE:
         logger.error(
-            f"Insufficient balance: required {lamports_to_sol(lamports)} SOL, "
+            f"Insufficient balance: required {lamports_to_sol(lamports)} SOL + fee, "
             f"available {lamports_to_sol(balance.value):.6f} SOL."
         )
         return None
+
+    elif balance.value < lamports:
+        logger.error(
+            f"Insufficient balance: not enough to cover fee. "
+            f"Available: {lamports_to_sol(balance.value):.6f} SOL."
+        )
+        return None
+
     return lamports
+
 
 async def send_transaction(
     client: AsyncClient,
@@ -85,7 +96,7 @@ async def send_to_single_wallet(
     
     sender = Keypair.from_base58_string(wallet_from["privkey"])
     receiver = Pubkey.from_string(wallet_to["pubkey"])
-    lamports = await calculate_lamports_to_send(client, sender.pubkey(), sol_amount)
+    lamports: int = await calculate_lamports_to_send(client, sender.pubkey(), sol_amount)
 
     if lamports:
         old_balance = await client.get_balance(receiver)
@@ -136,7 +147,7 @@ async def send_to_multiple_wallets(
     if lamports:
         amount_of_wallets: int = len(wallets_to)
         sender_balance_lamports: int = await client.get_balance(sender.pubkey())
-        total_lamports_amount: int = lamports * amount_of_wallets
+        total_lamports_amount: int = amount_of_wallets * (lamports + 5000)
         
         if sender_balance_lamports.value >= total_lamports_amount:
             logger.info(f"Sending {sol_amount} SOL to {amount_of_wallets} wallets.")
@@ -168,8 +179,8 @@ async def send_from_multiple_wallets(
         if not lamports:
             return
     
-    amount_of_wallets = len(wallets_from)
-    total_lamports_amount = lamports * amount_of_wallets 
+    amount_of_wallets: int = len(wallets_from)
+    total_lamports_amount: int = amount_of_wallets * (lamports + 5000)
     logger.info(f"Sending {sol_amount} SOL to {amount_of_wallets} wallets.")
     logger.info(f"Total amount to send: {lamports_to_sol(total_lamports_amount)} SOL")
 
@@ -178,13 +189,49 @@ async def send_from_multiple_wallets(
     
 async def split_balance_equally(
     client: AsyncClient,
-    wallets_from: list[dict],
-    wallets_to: list[dict],
-    sol_amount: float | str
+    wallets: list[dict],
 ) -> None:
     """Splits SOL balance equaly for multiple wallets"""
     
-    receivers = [Keypair.from_base58_string(wallet_to["privkey"]) for wallet_to in wallets_to]
-    senders = [Keypair.from_base58_string(wallet_from["privkey"]) for wallet_from in wallets_from]
+            
+    total_lamports: int = 0
+    balances = {}
+    for wallet in wallets:
+        pubkey = Pubkey.from_string(wallet["pubkey"])
+        wallet_balance = await client.get_balance(pubkey)
+        total_lamports += wallet_balance.value
+        balances[wallet["pubkey"]] = wallet_balance.value
+
+    amount_of_wallets: int = len(wallets)
+    TARGET: int = total_lamports // amount_of_wallets
+
+    for wallet_to in wallets:
+        to_pub = wallet_to["pubkey"]
+        to_balance = balances[to_pub]
+
+        if to_balance >= TARGET:
+            continue
+
+        need = TARGET - to_balance
+
+        for wallet_from in wallets:
+            from_pub = wallet_from["pubkey"]
+            from_balance = balances[from_pub]
+
+            if from_pub == to_pub:
+                continue 
+            
+            if from_balance - TARGET > need:
+                await send_to_single_wallet(
+                    client=client,
+                    wallet_from=wallet_from,
+                    wallet_to=wallet_to,
+                    sol_amount=lamports_to_sol(need),
+                    waiting_for_confirmation=False
+                )
+                balances[from_pub] -= need
+                balances[to_pub] += need
+                break
+                    
     
-    total_balance = ...
+    print(lamports_to_sol(total_lamports), lamports_to_sol(TARGET))
