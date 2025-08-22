@@ -30,6 +30,7 @@ cd solana-cli-wallet
 python3 -m venv venv
 source venv/bin/activate
 pip3 install -r requirements.txt
+echo "name,pubkey,privkey" > data/wallets.csv
 python3 main.py
 ```
 
@@ -41,5 +42,6 @@ cd solana-cli-wallet
 python -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
+echo name,pubkey,privkey > data\wallets.csv
 python main.py
 ```

@@ -41,8 +41,7 @@ dist/
 *.egg-info/
 
 # Main account data
-data/config.py
-run.sh
+wallets.csv
 
 # OS-specific
 Thumbs.db
