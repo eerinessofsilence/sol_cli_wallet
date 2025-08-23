@@ -124,10 +124,17 @@ async def add_wallets_file():
         message="Select file in '.csv' format:",
         default="path/to/your/file.csv",
         instruction="(type filepath • enter confirm)",
-        validate=lambda result: result.endswith(".csv") and os.path.exists(result),    
+        validate=lambda result: result.endswith(".csv") and os.path.exists(f"{result}"),    
     ).execute_async()
     
-    shutil.copy(choice, os.path.join("data", os.path.basename(choice)))
+    dest_path = os.path.join("data", os.path.basename(choice))
+    
+    if os.path.abspath(choice) == os.path.abspath(dest_path):
+        console.print(f"[red][!] File '{choice}' is already in 'data/' folder. Skipping copy.[/red]\n")
+    else:
+        shutil.copy(choice, dest_path)
+        console.print(f"[blue][•] File copied to {dest_path}[/blue]\n")
+        
     return await settings_menu()
         
 async def choose_wallets_file():
@@ -139,7 +146,7 @@ async def choose_wallets_file():
     ).execute_async()
     
     load_dotenv()
-    set_key(choice.split("data/")[1])
+    set_key(".env", "CSV_FILE", choice.split("data/")[1])
     return await settings_menu()
     
 async def change_rpc():
@@ -150,7 +157,8 @@ async def change_rpc():
         validate=lambda result: result.startswith(("http://", "https://", "ws://", "127.0.0.1"))
     ).execute_async()
     
-    print(choice)
+    load_dotenv()
+    set_key(".env", "RPC_URL", choice)
     
     return await settings_menu()
 
