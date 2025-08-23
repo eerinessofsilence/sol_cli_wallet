@@ -10,12 +10,16 @@ from utils.logger import logger
 LAMPORTS_PER_SOL = 1_000_000_000
 
 async def get_balance_safe(client: AsyncClient, pubkey: Pubkey) -> float:
-    resp = await client.get_balance(pubkey)
-    value = resp.value
-    if value is None:
-        logger.warning(f"No balance returned for {str(pubkey)}")
+    try:
+        resp = await client.get_balance(pubkey)
+        value = resp.value
+        if value is None:
+            logger.warning(f"No balance returned for {str(pubkey)}")
+            return 0.0
+        return value / LAMPORTS_PER_SOL
+    except Exception as e:
+        logger.error(f"Failed to fetch balance for {str(pubkey)}: {e}")
         return 0.0
-    return value / LAMPORTS_PER_SOL
 
 async def show_single_wallet_balance(client: AsyncClient, wallet: dict):
     pubkey_str = wallet.get("pubkey")
