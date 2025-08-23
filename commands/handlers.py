@@ -40,9 +40,6 @@ async def handle_mode(
 
 
     # MISC
-    elif mode == "settings":
-        console.print("[yellow][!] Settings are not implemented yet.[/yellow]")
-
     elif mode == "exit":
         console.print("[•] Exiting the program.")
 
