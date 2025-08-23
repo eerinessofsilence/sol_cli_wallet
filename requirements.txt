@@ -10,6 +10,7 @@ httpx==0.28.1
 idna==3.10
 inquirerpy==0.3.4
 python-dotenv==1.1.0
+pyinstaller==6.15.0
 requests==2.32.4
 rich==14.0.0
 solana==0.36.7

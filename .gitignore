@@ -39,6 +39,8 @@ coverage.xml
 build/
 dist/
 *.egg-info/
+*.spec
+*.txt
 
 # Main account data
 *.csv
