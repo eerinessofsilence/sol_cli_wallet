@@ -17,9 +17,9 @@ def keypair_from_array(arr: list[int]) -> tuple[str, str]:
     Из массива 64 байт [seed(32)+pub(32)] возвращает (priv_base58, pub_base58)
     """
     seed = bytes(arr[:32])
-    kp = Keypair.from_seed(seed)  # Keypair через seed
-    priv_base58 = base58.b58encode(bytes(arr)).decode()  # оригинальный 64-байтный privkey в base58
-    pub_base58 = str(kp.pubkey())  # публичный ключ из seed
+    kp = Keypair.from_seed(seed)
+    priv_base58 = base58.b58encode(bytes(arr)).decode()
+    pub_base58 = str(kp.pubkey())
     return priv_base58, pub_base58
 
 def fix_privkeys(path: str):
@@ -53,13 +53,11 @@ def fix_privkeys(path: str):
 
             rows.append(row)
 
-    # перезаписываем файл
     with open(path, "w", newline="", encoding="utf-8") as f_out:
         writer = csv.DictWriter(f_out, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
 
-    print(f"✅ Fixed CSV saved to {path}")
 
 def load_csv(path: str) -> list[dict]:
     """Load CSV file and return list of dicts."""
