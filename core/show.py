@@ -28,7 +28,7 @@ async def show_single_wallet_balance(client: AsyncClient, wallet: dict):
         return
     pubkey = Pubkey.from_string(pubkey_str)
     balance = await get_balance_safe(client, pubkey)
-    logger.info(f"[{wallet.get('name', 'Unnamed')}] {pubkey_str}: {balance:.6f} SOL")
+    logger.info(f"[{wallet.get('name')}] {pubkey_str}: {balance:.6f} SOL")
 
 async def show_all_wallet_balances(client: AsyncClient):
     wallets: List[dict] = config.WALLETS

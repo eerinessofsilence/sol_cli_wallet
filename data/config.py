@@ -1,24 +1,38 @@
 import csv
 from pathlib import Path
+from dotenv import load_dotenv
+from os import getenv
 
-CSV_FILE = Path(__file__).parent / "wallets.csv"
+load_dotenv()
 
-def load_wallets(csv_path: Path):
+CSV_FILE = Path(__file__).parent / getenv("CSV_FILE")
+
+def load_csv(path: str) -> list[dict]:
+    """Load CSV file and return list of dicts."""
     wallets = []
-    with open(csv_path, newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            wallets.append({
-                "name": row["name"].strip(),
-                "pubkey": row["pubkey"].strip(),
-                "privkey": row["privkey"].strip(),
-            })
+    try:
+        with open(path, newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                wallets.append({k: v.strip() for k, v in row.items()})
+    except FileNotFoundError:
+        print(f"File {path} not found.")
+    except Exception as e:
+        print(f"Error reading {path}: {e}")
     return wallets
 
-WALLETS: list[dict] = load_wallets(CSV_FILE)
-PUBLIC_KEYS: list[str] = [wallet.get("pubkey") for wallet in WALLETS]
-PRIVATE_KEYS: list[str] = [wallet.get("privkey") for wallet in WALLETS]
-WALLET_NAMES: list[str] = [
-    wallet.get("name").strip() if wallet.get("name") else f"{i + 1}"
-    for i, wallet in enumerate(WALLETS)
-]
+
+def load_wallets() -> list[dict]:
+    wallets = []
+    for i, wallet in enumerate(load_csv(CSV_FILE)):
+        name = wallet.get("name").strip() if wallet.get("name") else str(i + 1)
+        wallets.append(
+            {"name": name, "pubkey": wallet.get("pubkey", "").strip(), "privkey": wallet.get("privkey", "").strip()}
+        )
+    return wallets
+
+WALLETS = load_wallets()
+
+WALLET_NAMES = [w.get("name") for w in WALLETS]
+PUBLIC_KEYS  = [w.get("pubkey") for w in WALLETS]
+PRIVATE_KEYS = [w.get("privkey") for w in WALLETS]

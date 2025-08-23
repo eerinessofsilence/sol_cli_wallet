@@ -1,10 +1,14 @@
+import os
+import shutil
+from dotenv import load_dotenv, set_key
 from InquirerPy import inquirer
 from rich.console import Console
 from rich.text import Text
-from rich.align import Align
 from data import config
 
 console = Console()
+### MISC ###
+
 
 def validate_amount(x: str) -> bool:
     x = x.strip().replace(',', '.')
@@ -31,6 +35,9 @@ async def render_ascii():
     console.print(styled_ascii_art)
 
 
+### MAIN MENUS ###
+
+
 async def main_menu():
     try:
         await render_ascii()
@@ -39,7 +46,7 @@ async def main_menu():
     choice = await inquirer.select(
         message="Main menu:",
         choices=[
-            {"name": "Manage wallets", "value": "manage_wallets"},
+            {"name": "Manage wallets", "value": "manage_wallets_menu"},
             {"name": "Settings", "value": "settings"},
             {"name": "Exit", "value": "exit"},
         ],
@@ -47,15 +54,14 @@ async def main_menu():
         instruction="(↑ up • ↓ down • enter submit)",
     ).execute_async()
 
-    if choice == "manage_wallets":
-        return await manage_menu()
+    if choice == "manage_wallets_menu":
+        return await manage_wallets_menu()
     elif choice == "settings":
-        return (choice, None, None, None)
+        return await settings_menu()
     elif choice == "exit":
         return (choice, None, None, None)
 
-
-async def manage_menu() -> tuple[str, dict]:
+async def manage_wallets_menu() -> tuple[str, dict]:
     choice = await inquirer.select(
         message="What would you like to do?",
         choices=[
@@ -74,6 +80,83 @@ async def manage_menu() -> tuple[str, dict]:
     elif choice == "send_sol_menu":
         return await send_sol_menu()
 
+async def settings_menu():
+    choice = await inquirer.select(
+        message="What would you like to do?",
+        choices=[
+            {"name": "Add wallets", "value": "add_wallets_menu"},
+            {"name": "Choose wallets", "value": "choose_wallets_file"},
+            {"name": "Change RPC", "value": "change_rpc"},
+            {"name": "Back", "value": "back"},
+        ],
+        pointer="❯",
+        instruction="(↑ up • ↓ down • enter submit)",
+    ).execute_async()
+
+    if choice == "back":
+        return await main_menu()
+    elif choice == "add_wallets_menu":
+        return await add_wallets_menu()
+    elif choice == "choose_wallets_file":
+        return await choose_wallets_file()
+    elif choice == "change_rpc":
+        return await change_rpc()
+
+async def add_wallets_menu():
+    if os.path.exists("data/wallets.csv"):
+        choice = await inquirer.confirm(
+            message="File 'wallets.csv' already exists. WARNING! This action will overwrite it. Continue?",
+            default=True,
+            instruction="(y - yes / n - no)",
+        ).execute_async()
+    
+        if choice:
+            os.remove("data/wallets.csv")
+            return await add_wallets_file()
+        else:
+            return await settings_menu()
+        
+    else:
+        return await add_wallets_file()
+    
+async def add_wallets_file():
+    choice = await inquirer.filepath(
+        message="Select file in '.csv' format:",
+        default="path/to/your/file.csv",
+        instruction="(type filepath • enter confirm)",
+        validate=lambda result: result.endswith(".csv") and os.path.exists(result),    
+    ).execute_async()
+    
+    shutil.copy(choice, os.path.join("data", os.path.basename(choice)))
+    return await settings_menu()
+        
+async def choose_wallets_file():
+    choice = await inquirer.filepath(
+        message="Select file in '.csv' format that exists in data folder:",
+        default="data/wallets.csv",
+        instruction="(type filename • enter confirm)",
+        validate=lambda result: result.endswith(".csv") and os.path.exists(f"{result}"),   
+    ).execute_async()
+    
+    load_dotenv()
+    set_key(choice.split("data/")[1])
+    return await settings_menu()
+    
+async def change_rpc():
+    choice = await inquirer.text(
+        message="Enter new RPC endpoint:",
+        default="https://api.mainnet-beta.solana.com",
+        instruction="(type url • enter confirm)",
+        validate=lambda result: result.startswith(("http://", "https://", "ws://", "127.0.0.1"))
+    ).execute_async()
+    
+    print(choice)
+    
+    return await settings_menu()
+
+
+### SHOW / SEND MENUS ###
+
 async def show_sol_menu():
     choice = await inquirer.select(
         message="Select mode:",
@@ -87,7 +170,7 @@ async def show_sol_menu():
     ).execute_async()
 
     if choice == "back":
-        return await manage_menu()
+        return await manage_wallets_menu()
     elif choice == "show_single_wallet_balance":
         return await wallet_menu(mode=choice)
     elif choice == "show_all_wallet_balances":
@@ -108,7 +191,7 @@ async def send_sol_menu():
     ).execute_async()
 
     if choice == "back":
-        return await manage_menu()
+        return await manage_wallets_menu()
     else:
         return await wallet_menu(mode=choice)
 

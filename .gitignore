@@ -41,7 +41,7 @@ dist/
 *.egg-info/
 
 # Main account data
-wallets.csv
+*.csv
 
 # OS-specific
 Thumbs.db
