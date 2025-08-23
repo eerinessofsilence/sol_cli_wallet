@@ -1,35 +1,37 @@
-import subprocess
-import sys
 import os
-import shutil
+import subprocess
+import platform
 
-script = "main.py"
-script_path = os.path.abspath(script)
+script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "main.py")
 
-if sys.platform == "win32":
-    # Windows
-    subprocess.run(["cmd", "/k", f"python \"{script_path}\""])
-elif sys.platform == "darwin":
-    # MacOS
-    subprocess.run([
-        "osascript", "-e",
-        f'tell app "Terminal" to do script "python3 \\"{script_path}\\""'
-    ])
+def run_on_macos():
+    applescript = f'''
+    tell application "Terminal"
+        do script "python3 '{script_path}'"
+        activate
+    end tell
+    '''
+    subprocess.run(["osascript", "-e", applescript])
+
+def run_on_linux():
+    terminals = ["gnome-terminal", "konsole", "xterm", "alacritty", "kitty", "wezterm"]
+    for term in terminals:
+        if shutil.which(term):
+            cmd = f"python3 '{script_path}'; exec bash"
+            subprocess.Popen([term, "-e", "bash", "-c", cmd])
+            return
+    print("Supported terminal not found.")
+
+def run_on_windows():
+    subprocess.Popen(["cmd.exe", "/k", f"python \"{script_path}\""])
+
+os_name = platform.system()
+if os_name == "Darwin":
+    run_on_macos()
+elif os_name == "Linux":
+    import shutil
+    run_on_linux()
+elif os_name == "Windows":
+    run_on_windows()
 else:
-    # Linux
-    terminals = ["gnome-terminal", "konsole", "xterm", "alacritty", "kitty", "foot", "wezterm"]
-    try:
-        for term in terminals:
-            if shutil.which(term):
-                subprocess.run([term, "-e", "python3", script_path])
-                break
-        else:
-            print("Not found terminal, install one of these: " + ", ".join(terminals))
-        subprocess.run(["x-terminal-emulator", "-e", f"python3 \"{script_path}\""])
-    except FileNotFoundError:
-        for term in ["gnome-terminal", "konsole", "xterm"]:
-            try:
-                subprocess.run([term, "-e", f"python3 \"{script_path}\""])
-                break
-            except FileNotFoundError:
-                continue
+    print(f"{os_name} operating system is not supported.")
