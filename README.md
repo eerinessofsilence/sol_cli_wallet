@@ -31,6 +31,8 @@ python3 -m venv venv
 source venv/bin/activate
 pip3 install -r requirements.txt
 echo "name,pubkey,privkey" > data/wallets.csv
+echo "RPC_URL=" > .env
+echo "CSV_FILE=wallets.csv" >> .env
 python3 main.py
 ```
 
@@ -43,5 +45,7 @@ python -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
 echo name,pubkey,privkey > data\wallets.csv
+echo RPC_URL= > .env
+echo CSV_FILE=wallets.csv >> .env
 python main.py
 ```

@@ -14,7 +14,7 @@ CSV_FILE = Path(__file__).parent / getenv("CSV_FILE")
 
 def keypair_from_array(arr: list[int]) -> tuple[str, str]:
     """
-    Из массива 64 байт [seed(32)+pub(32)] возвращает (priv_base58, pub_base58)
+    From a 64-byte array [seed(32) + pub(32)] returns (priv_base58, pub_base58).
     """
     seed = bytes(arr[:32])
     kp = Keypair.from_seed(seed)
@@ -24,8 +24,8 @@ def keypair_from_array(arr: list[int]) -> tuple[str, str]:
 
 def fix_privkeys(path: str):
     """
-    Читает CSV с колонкой 'privkey', конвертирует массивы [64 байта] в base58,
-    и сразу ставит pubkey, перезаписывая тот же файл.
+    Reads a CSV with a column 'privkey', converts 64-byte arrays to base58,
+    and immediately sets the pubkey, overwriting the same file.
     """
     rows = []
     with open(path, newline="", encoding="utf-8") as f_in:
