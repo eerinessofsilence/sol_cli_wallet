@@ -46,31 +46,31 @@ async def main_menu():
     choice = await inquirer.select(
         message="Main menu:",
         choices=[
-            {"name": "Manage wallets", "value": "manage_wallets_menu"},
+            {"name": "Wallets operations", "value": "wallets_operations"},
             {"name": "Settings", "value": "settings"},
             {"name": "Exit", "value": "exit"},
         ],
         pointer="❯",
-        instruction="(↑ up • ↓ down • enter submit)",
+        long_instruction="(↑ up • ↓ down • enter submit)",
     ).execute_async()
 
-    if choice == "manage_wallets_menu":
-        return await manage_wallets_menu()
+    if choice == "wallets_operations":
+        return await wallets_operations()
     elif choice == "settings":
         return await settings_menu()
     elif choice == "exit":
         return (choice, None, None, None)
 
-async def manage_wallets_menu() -> tuple[str, dict]:
+async def wallets_operations() -> tuple[str, dict]:
     choice = await inquirer.select(
-        message="What would you like to do?",
+        message="Choose a wallet operation:",
         choices=[
             {"name": "Show SOL", "value": "show_sol_menu"},
             {"name": "Send SOL", "value": "send_sol_menu"},
             {"name": "Back", "value": "back"},
         ],
         pointer="❯",
-        instruction="(↑ up • ↓ down • enter submit)",
+        long_instruction="(↑ up • ↓ down • enter submit)",
     ).execute_async()
 
     if choice == "back":
@@ -84,77 +84,155 @@ async def settings_menu():
     choice = await inquirer.select(
         message="What would you like to do?",
         choices=[
-            {"name": "Add wallets", "value": "add_wallets_menu"},
-            {"name": "Choose wallets", "value": "choose_wallets_file"},
-            {"name": "Change RPC", "value": "change_rpc"},
+            {"name": "Manage wallets", "value": "manage_wallets_menu"},
+            {"name": "Manage RPCs", "value": "manage_rpcs_menu"},
             {"name": "Back", "value": "back"},
         ],
         pointer="❯",
-        instruction="(↑ up • ↓ down • enter submit)",
+        long_instruction="(↑ up • ↓ down • enter submit)",
     ).execute_async()
 
     if choice == "back":
         return await main_menu()
-    elif choice == "add_wallets_menu":
-        return await add_wallets_menu()
+    elif choice == "manage_wallets_menu":
+        return await manage_wallets_menu()
+    elif choice == "manage_rpcs_menu":
+        return await manage_rpcs_menu()
+
+
+### WALLETS MENUS ###
+
+
+async def manage_wallets_menu():
+    choice = await inquirer.select(
+        message="How do you want to manage wallets?",
+        choices=[
+            {"name": "Add wallets file", "value": "add_wallets_file"},
+            {"name": "Choose wallets file", "value": "choose_wallets_file"},
+            {"name": "Back", "value": "back"},
+        ],
+        pointer="❯",
+        long_instruction="(↑ up • ↓ down • enter submit)",
+    ).execute_async()
+
+    if choice == "back":
+        return await settings_menu()
+    elif choice == "add_wallets_file":
+        return await add_wallets_file()
     elif choice == "choose_wallets_file":
         return await choose_wallets_file()
-    elif choice == "change_rpc":
-        return await change_rpc()
-
-async def add_wallets_menu():
-    if os.path.exists("data/wallets.csv"):
-        choice = await inquirer.confirm(
-            message="File 'wallets.csv' already exists. WARNING! This action will overwrite it. Continue?",
-            default=True,
-            instruction="(y - yes / n - no)",
-        ).execute_async()
-    
-        if choice:
-            os.remove("data/wallets.csv")
-            return await add_wallets_file()
-        else:
-            return await settings_menu()
-        
-    else:
-        return await add_wallets_file()
     
 async def add_wallets_file():
-    choice = await inquirer.filepath(
+    file_choice = await inquirer.filepath(
         message="Select file in '.csv' format:",
         default="path/to/your/file.csv",
-        instruction="(type filepath • enter confirm)",
-        validate=lambda result: result.endswith(".csv") and os.path.exists(f"{result}"),    
+        long_instruction="(type filepath • enter confirm)",
+        invalid_message="This path is invalid or it contains data folder.",
+        validate=lambda result: result.endswith(".csv") and os.path.exists(result) and "data" not in (result.split("/")),    
     ).execute_async()
     
-    dest_path = os.path.join("data", os.path.basename(choice))
+    dest_path = os.path.join("data", os.path.basename(file_choice))
     
-    if os.path.abspath(choice) == os.path.abspath(dest_path):
-        console.print(f"[red][!] File '{choice}' is already in 'data/' folder. Skipping copy.[/red]\n")
+    if os.path.exists(os.path.abspath(dest_path)):
+        overwrite_choice = await inquirer.confirm(
+            message=f"File '{file_choice}' already exists. WARNING! This action will overwrite it. Continue?",
+            default=True,
+            long_instruction="(y - yes / n - no)",
+        ).execute_async()
+        if overwrite_choice:
+            os.remove("data/wallets.csv")
+            shutil.copy(file_choice, dest_path)
+            load_dotenv()
+            set_key(".env", "CSV_FILE", file_choice)
+            console.print(f"[blue][•] File copied to {dest_path}[/blue]\n")
+        else:
+            return await manage_wallets_menu()
     else:
-        shutil.copy(choice, dest_path)
+        shutil.copy(file_choice, dest_path)
+        load_dotenv()
+        set_key(".env", "CSV_FILE", file_choice)
         console.print(f"[blue][•] File copied to {dest_path}[/blue]\n")
         
     return await settings_menu()
         
 async def choose_wallets_file():
-    choice = await inquirer.filepath(
-        message="Select file in '.csv' format that exists in data folder:",
-        default="data/wallets.csv",
-        instruction="(type filename • enter confirm)",
-        validate=lambda result: result.endswith(".csv") and os.path.exists(f"{result}"),   
+    choices = [choice for choice in os.listdir("data") if choice.endswith(".csv")]
+    choice = await inquirer.select(
+        message="Select wallets file:",
+        choices=choices,
+        long_instruction="(↑ up • ↓ down • enter submit)",  
     ).execute_async()
     
     load_dotenv()
-    set_key(".env", "CSV_FILE", choice.split("data/")[1])
-    return await settings_menu()
+    set_key(".env", "CSV_FILE", choice)
     
-async def change_rpc():
+    return await settings_menu()
+
+
+### RPCS MENUS ###
+
+
+async def manage_rpcs_menu():
+    choice = await inquirer.select(
+        message="How do you want to manage RPCs?",
+        choices=[
+            {"name": "Add RPC", "value": "add_rpc"},
+            {"name": "Remove RPC", "value": "remove_rpc"},
+            {"name": "Choose RPC", "value": "choose_rpc"},
+            {"name": "Back", "value": "back"},
+        ],
+        pointer="❯",
+        long_instruction="(↑ up • ↓ down • enter submit)",
+    ).execute_async()
+
+    if choice == "back":
+        return await settings_menu()
+    elif choice == "add_rpc":
+        return await add_rpc()
+    elif choice == "remove_rpc":
+        return await remove_rpc()
+    elif choice == "choose_rpc":
+        return await choose_rpc()
+    
+async def add_rpc():
     choice = await inquirer.text(
         message="Enter new RPC endpoint:",
         default="https://api.mainnet-beta.solana.com",
-        instruction="(type url • enter confirm)",
-        validate=lambda result: result.startswith(("http://", "https://", "ws://", "127.0.0.1"))
+        long_instruction="(type url • enter confirm)",
+        invalid_message="This RPC is invalid or already in list.",
+        validate=lambda result: result.startswith(("http://", "https://", "ws://", "127.0.0.1")) and result not in config.RPCS
+    ).execute_async()
+    
+    config.RPCS.append(choice)
+    load_dotenv()
+    set_key(".env", "RPC_URL", choice)
+    
+    return await settings_menu()
+
+async def remove_rpc():
+    rpc_choices = config.RPCS
+    
+    choice = await inquirer.select(
+        message="Choose RPC that you want to remove:",
+        choices=rpc_choices,
+        long_instruction="(↑ up • ↓ down • enter submit)",
+        invalid_message="This RPC is default or not in list.",
+        validate=lambda result: result != "https://api.mainnet-beta.solana.com" and result in config.RPCS
+    ).execute_async()
+    
+    config.RPCS.remove(choice)
+    load_dotenv()
+    
+    return await settings_menu()
+
+async def choose_rpc():
+    rpc_choices = config.RPCS
+
+    choice = await inquirer.select(
+        message="Choose RPC endpoint:",
+        choices=rpc_choices,
+        default="https://api.mainnet-beta.solana.com",
+        long_instruction="(↑ up • ↓ down • enter submit)",
     ).execute_async()
     
     load_dotenv()
@@ -165,20 +243,21 @@ async def change_rpc():
 
 ### SHOW / SEND MENUS ###
 
+
 async def show_sol_menu():
     choice = await inquirer.select(
         message="Select mode:",
         choices=[
-            {"name": "Show single wallet balance", "value": "show_single_wallet_balance"},
             {"name": "Show all wallet balances", "value": "show_all_wallet_balances"},
+            {"name": "Show single wallet balance", "value": "show_single_wallet_balance"},
             {"name": "Back", "value": "back"},
         ],
         pointer="❯",
-        instruction="(↑ up • ↓ down • enter submit)",
+        long_instruction="(↑ up • ↓ down • enter submit)",
     ).execute_async()
 
     if choice == "back":
-        return await manage_wallets_menu()
+        return await wallets_operations()
     elif choice == "show_single_wallet_balance":
         return await wallet_menu(mode=choice)
     elif choice == "show_all_wallet_balances":
@@ -195,11 +274,11 @@ async def send_sol_menu():
             {"name": "Back", "value": "back"},
         ],
         pointer="❯",
-        instruction="(↑ up • ↓ down • enter submit)",
+        long_instruction="(↑ up • ↓ down • enter submit)",
     ).execute_async()
 
     if choice == "back":
-        return await manage_wallets_menu()
+        return await wallets_operations()
     else:
         return await wallet_menu(mode=choice)
 
@@ -214,7 +293,7 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
             message="Select wallet:",
             choices=wallets,
             pointer="❯",
-            instruction="(↑ up • ↓ down • enter submit)",
+            long_instruction="(↑ up • ↓ down • enter submit)",
         ).execute_async()
 
         if wallet_choice == "back":
@@ -232,7 +311,7 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
             message="Select sender wallet:",
             choices=wallet_from_choices,
             pointer="❯",
-            instruction="(↑ up • ↓ down • enter submit)",
+            long_instruction="(↑ up • ↓ down • enter submit)",
         ).execute_async()
 
         if wallet_from == "back":
@@ -243,7 +322,7 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
             message="Select receiver wallet:",
             choices=wallets_to,
             pointer="❯",
-            instruction="(↑ up • ↓ down • enter submit)",
+            long_instruction="(↑ up • ↓ down • enter submit)",
         ).execute_async()
 
         if wallet_to == "back":
@@ -253,7 +332,7 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
             message="Enter amount of SOL to send:",
             validate=validate_amount,
             invalid_message="Enter a valid amount, percentage must be between 0 and 100, or a valid SOL amount greater than 0.000005.",
-            instruction="(e.g. 0.1 or 50% for percentage of balance)",
+            long_instruction="(e.g. 0.1 or 50% for percentage of balance)",
         ).execute_async()
         sol_amount = amount_input if "%" in amount_input else float(amount_input)
     
@@ -268,7 +347,7 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
                 {"name": "Back", "value": "back"},
             ],
             pointer="❯",
-            instruction="(↑ up • ↓ down • enter submit)",
+            long_instruction="(↑ up • ↓ down • enter submit)",
         ).execute_async()
         
         if choice == "all_wallets":       
@@ -281,7 +360,7 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
                 message="Select sender wallet:",
                 choices=wallet_from_choices,
                 pointer="❯",
-                instruction="(↑ up • ↓ down • enter submit)",
+                long_instruction="(↑ up • ↓ down • enter submit)",
             ).execute_async()
 
             if wallet_from == "back":
@@ -293,7 +372,7 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
                 message="Enter amount of SOL to send:",
                 validate=validate_amount,
                 invalid_message="Enter a valid amount: a number > 0.000005 or a percentage (0-100%) like 50%.",
-                instruction="(e.g. 0.1 or 50% for percentage of balance)",
+                long_instruction="(e.g. 0.1 or 50% for percentage of balance)",
             ).execute_async()
             sol_amount = amount_input
 
@@ -309,7 +388,7 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
                 message="Select sender wallet:",
                 choices=wallet_from_choices,
                 pointer="❯",
-                instruction="(↑ up • ↓ down • enter submit)",
+                long_instruction="(↑ up • ↓ down • enter submit)",
             ).execute_async()
 
             if wallet_from == "back":
@@ -323,7 +402,7 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
                 message="Choose destination wallets:",
                 choices=wallets_to_choices,
                 pointer="❯",
-                instruction="(↑ up • ↓ down • space select • enter submit)",
+                long_instruction="(↑ up • ↓ down • space select • enter submit)",
             ).execute_async()
             
             if wallets_to == []:
@@ -333,7 +412,7 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
                 message="Enter amount of SOL to send:",
                 validate=validate_amount,
                 invalid_message="Enter a valid amount: a number > 0.000005 or a percentage (0-100%) like 50%.",
-                instruction="(e.g. 0.1 or 50% for percentage of balance)",
+                long_instruction="(e.g. 0.1 or 50% for percentage of balance)",
             ).execute_async()
             sol_amount = amount_input
 
@@ -351,7 +430,7 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
                 {"name": "Back", "value": "back"},
             ],
             pointer="❯",
-            instruction="(↑ up • ↓ down • enter submit)",
+            long_instruction="(↑ up • ↓ down • enter submit)",
         ).execute_async()
         
         if choice == "all_wallets":       
@@ -364,7 +443,7 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
                 message="Select receiver wallet:",
                 choices=wallet_to_choices,
                 pointer="❯",
-                instruction="(↑ up • ↓ down • enter submit)",
+                long_instruction="(↑ up • ↓ down • enter submit)",
             ).execute_async()
 
             if wallet_to == "back":
@@ -379,7 +458,7 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
                 message="Enter amount of SOL to send:",
                 validate=validate_amount,
                 invalid_message="Enter a valid amount: a number > 0.000005 or a percentage (0-100%) like 50%.",
-                instruction="(e.g. 0.1 or 50% for percentage of balance)",
+                long_instruction="(e.g. 0.1 or 50% for percentage of balance)",
             ).execute_async()
             sol_amount = amount_input
 
@@ -394,7 +473,7 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
                 message="Choose source wallets:",
                 choices=wallet_from_choices,
                 pointer="❯",
-                instruction="(↑ up • ↓ down • enter submit)",
+                long_instruction="(↑ up • ↓ down • enter submit)",
             ).execute_async()
 
             from_pubkeys = {w.get("pubkey") for w in wallets_from}
@@ -408,14 +487,14 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
                 message="Select receiver wallet:",
                 choices=wallets_to_choices,
                 pointer="❯",
-                instruction="(↑ up • ↓ down • space select • enter submit)",
+                long_instruction="(↑ up • ↓ down • space select • enter submit)",
             ).execute_async()
             
             amount_input = await inquirer.text(
                 message="Enter amount of SOL to send:",
                 validate=validate_amount,
                 invalid_message="Enter a valid amount: a number > 0.000005 or a percentage (0-100%) like 50%.",
-                instruction="(e.g. 0.1 or 50% for percentage of balance)",
+                long_instruction="(e.g. 0.1 or 50% for percentage of balance)",
             ).execute_async()
             sol_amount = amount_input
 
@@ -433,7 +512,7 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
                 {"name": "Back", "value": "back"},
             ],
             pointer="❯",
-            instruction="(↑ up • ↓ down • enter submit)",
+            long_instruction="(↑ up • ↓ down • enter submit)",
         ).execute_async()
         
         if choice == "all_wallets":       
@@ -450,7 +529,7 @@ async def wallet_menu(mode: str) -> tuple[str, dict, dict]:
                 message="Choose source wallets:",
                 choices=wallets_choices,
                 pointer="❯",
-                instruction="(↑ up • ↓ down • enter submit)",
+                long_instruction="(↑ up • ↓ down • enter submit)",
             ).execute_async()
             
             return mode, wallets

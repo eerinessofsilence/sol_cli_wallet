@@ -39,3 +39,5 @@ async def show_all_wallet_balances(client: AsyncClient):
     balances = await asyncio.gather(*tasks)
     total = sum(balances)
     logger.info(f"Total balance of all wallets: {total:.6f} SOL")
+    for wallet, balance in zip(wallets, balances):
+        logger.info(f"{wallet.get('name')}: {balance}")
