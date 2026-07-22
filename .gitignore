@@ -42,6 +42,11 @@ dist/
 *.spec
 *.txt
 
+# Desktop UI build files
+desktop-ui/node_modules/
+desktop-ui/dist/
+desktop-ui/dist-electron/
+
 # Main account data
 *.csv
 

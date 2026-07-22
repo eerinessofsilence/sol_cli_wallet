@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: Inter, 'Avenir Next', 'Segoe UI', sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+
+  --color-app: #1b1b20;
+  --color-surface: #232329;
+  --color-raised: #292830;
+  --color-muted: #2c2b33;
+  --color-soft: #32313a;
+  --color-sidebar: #202026;
+  --color-ink: #f4f0ff;
+  --color-copy: #d7cff0;
+  --color-dim: #aaa3bc;
+  --color-faint: #827b92;
+  --color-line: #45414f;
+  --color-line-strong: #5e576d;
+  --color-line-soft: #35333d;
+  --color-primary: #b8a7f0;
+  --color-primary-strong: #a994eb;
+  --color-warning: #f0bf63;
+  --color-danger: #ff7f6f;
+}

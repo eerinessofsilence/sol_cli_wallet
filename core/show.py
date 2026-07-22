@@ -32,9 +32,7 @@ async def show_single_wallet_balance(client: AsyncClient, wallet: dict):
 
 async def show_all_wallet_balances(client: AsyncClient):
     wallets: List[dict] = config.WALLETS
-    pubkeys = [
-        Pubkey.from_string(wallet["pubkey"]) for wallet in wallets if wallet.get("pubkey")
-    ]
+    pubkeys = [Pubkey.from_string(wallet["pubkey"]) for wallet in wallets if wallet.get("pubkey")]
     tasks = [get_balance_safe(client, pubkey) for pubkey in pubkeys]
     balances = await asyncio.gather(*tasks)
     total = sum(balances)

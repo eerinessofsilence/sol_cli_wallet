@@ -2,6 +2,11 @@
 
 A command-line wallet for working with Solana without using third-party GUI wallets.
 
+The project now has two independent entry points:
+
+- **Desktop UI** — Electron + React interface for day-to-day work.
+- **CLI** — the original interactive terminal menu remains available.
+
 ---
 
 ## 📦 Features
@@ -13,6 +18,10 @@ A command-line wallet for working with Solana without using third-party GUI wall
 - Security: keys only in RAM, optional encryption.
 - Works via RPC without Phantom/MetaMask.
 - Network configuration via `.env`.
+- Desktop dashboard, wallet search, CSV import and RPC health checks.
+- Transaction review with the exact amount and estimated fee before signing.
+- Batch distribution, consolidation and balance equalization.
+- Private keys stay inside the local Python process and are never returned to the UI.
 
 ---
 
@@ -35,6 +44,39 @@ echo "RPC_URL=https://api.mainnet-beta.solana.com" > .env
 echo "CSV_FILE=wallets.csv" >> .env
 python3 main.py
 ```
+
+### Desktop UI
+
+Install the Python dependencies as above, then install the renderer dependencies once:
+
+```bash
+cd desktop-ui
+npm install
+cd ..
+```
+
+Start the desktop application:
+
+```bash
+python3 run_desktop.py
+```
+
+For a production renderer build:
+
+```bash
+cd desktop-ui
+npm run build
+```
+
+The renderer uses Tailwind CSS utilities directly in React `className` attributes. To format
+TypeScript, JSX, and Tailwind class order consistently:
+
+```bash
+cd desktop-ui
+npm run format
+```
+
+The desktop backend binds only to `127.0.0.1`. It reads the same `.env` and CSV file as the CLI, so changing the active RPC or wallet file in the UI also changes it for the next CLI launch.
 
 ### 🪟 Windows
 

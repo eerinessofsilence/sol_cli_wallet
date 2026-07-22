@@ -51,7 +51,7 @@ def fix_privkeys(path: str):
                         row["pubkey"] = pub_base58
 
                     except Exception as e:
-                        logger.error(f"Bad privkey in row: {v} ({e})")
+                        logger.error(f"Bad private key row; value omitted ({e})")
 
                 rows.append(row)
 
@@ -77,20 +77,26 @@ def load_csv(path: str) -> list[dict]:
     return wallets
 
 def load_wallets() -> list[dict]:
-    """Return list of wallets."""
+    """Return list of unique wallets (by privkey)."""
     wallets = []
+    seen_privkeys = set()
+
     for i, wallet in enumerate(load_csv(CSV_FILE)):
         name = wallet.get("name").strip() if wallet.get("name") else str(i + 1)
-        wallets.append(
-            {"name": name, "pubkey": wallet.get("pubkey", "").strip(), "privkey": wallet.get("privkey", "").strip()}
-        )
+        privkey = wallet.get("privkey", "").strip()
+        pubkey = wallet.get("pubkey", "").strip()
+
+        if privkey not in seen_privkeys:
+            wallets.append({"name": name, "pubkey": pubkey, "privkey": privkey})
+            seen_privkeys.add(privkey)
+
     return wallets
 
 fix_privkeys(CSV_FILE)
-WALLETS = load_wallets()
+WALLETS: list[dict] = load_wallets()
 
-WALLET_NAMES = [w.get("name") for w in WALLETS]
-PUBLIC_KEYS  = [w.get("pubkey") for w in WALLETS]
-PRIVATE_KEYS = [w.get("privkey") for w in WALLETS]
+WALLET_NAMES: list[str] = [w.get("name") for w in WALLETS]
+PUBLIC_KEYS: list[str]  = [w.get("pubkey") for w in WALLETS]
+PRIVATE_KEYS: list[str]  = [w.get("privkey") for w in WALLETS]
 
 RPCS: list[str] = ["https://api.mainnet-beta.solana.com"]
