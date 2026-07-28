@@ -1,93 +1,60 @@
-# 🪙 Solana CLI Wallet (Python)
+# NODAL
 
-A command-line wallet for working with Solana without using third-party GUI wallets.
+**NODAL** is a local-first Solana operations desk with an Electron desktop app and an interactive Python CLI. It connects directly to Solana RPC endpoints, keeping private keys inside the local Python process rather than returning them to the UI.
 
-The project now has two independent entry points:
+## Highlights
 
-- **Desktop UI** — Electron + React interface for day-to-day work.
-- **CLI** — the original interactive terminal menu remains available.
+- Import Base58 and JSON-array private keys
+- View SOL, SPL token, and NFT balances
+- Send SOL, tokens, and NFTs with an amount and fee review before signing
+- Run batch distributions, wallet consolidation, and balance equalization
+- Search wallets, import CSV files, and check RPC health from the desktop app
+- Configure the active RPC endpoint and wallet file through `.env`
 
----
-
-## 📦 Features
-
-- Import private keys (base58 / JSON array).
-- View SOL balance, SPL tokens, NFTs.
-- Send SOL, tokens, NFTs.
-- Batch (mass) sending.
-- Security: keys only in RAM, optional encryption.
-- Works via RPC without Phantom/MetaMask.
-- Network configuration via `.env`.
-- Desktop dashboard, wallet search, CSV import and RPC health checks.
-- Transaction review with the exact amount and estimated fee before signing.
-- Batch distribution, consolidation and balance equalization.
-- Private keys stay inside the local Python process and are never returned to the UI.
-
----
-
-## 🔧 Installation
-
-### ⚙️ Requirements
+## Stack
 
 - Python 3.11+
+- Electron + React desktop interface
+- Solana RPC
 
-### 🐧 Linux / 🍎 MacOS
+## Start the CLI
 
 ```bash
 git clone https://github.com/eerinessofsilence/sol_cli_wallet
 cd sol_cli_wallet
 python3 -m venv venv
 source venv/bin/activate
-pip3 install -r requirements.txt
-echo "name,pubkey,privkey" > data/wallets.csv
-echo "RPC_URL=https://api.mainnet-beta.solana.com" > .env
-echo "CSV_FILE=wallets.csv" >> .env
+pip install -r requirements.txt
+cp .env.example .env
 python3 main.py
 ```
 
-### Desktop UI
+Create or select the wallet CSV referenced by `CSV_FILE` in `.env`. The expected header is:
 
-Install the Python dependencies as above, then install the renderer dependencies once:
+```csv
+name,pubkey,privkey
+```
+
+## Start the Desktop App
 
 ```bash
 cd desktop-ui
 npm install
 cd ..
-```
-
-Start the desktop application:
-
-```bash
 python3 run_desktop.py
 ```
 
-For a production renderer build:
+Build the desktop renderer:
 
 ```bash
 cd desktop-ui
 npm run build
 ```
 
-The renderer uses Tailwind CSS utilities directly in React `className` attributes. To format
-TypeScript, JSX, and Tailwind class order consistently:
+The desktop backend binds only to `127.0.0.1` and uses the same `.env` and wallet CSV file as the CLI.
 
-```bash
-cd desktop-ui
-npm run format
-```
+## Security
 
-The desktop backend binds only to `127.0.0.1`. It reads the same `.env` and CSV file as the CLI, so changing the active RPC or wallet file in the UI also changes it for the next CLI launch.
-
-### 🪟 Windows
-
-```bash
-git clone https://github.com/eerinessofsilence/sol_cli_wallet
-cd sol_cli_wallet
-python -m venv venv
-.\venv\Scripts\activate
-pip install -r requirements.txt
-echo name,pubkey,privkey > data\wallets.csv
-echo RPC_URL=https://api.mainnet-beta.solana.com > .env
-echo CSV_FILE=wallets.csv >> .env
-python main.py
-```
+- Never commit `.env` files or wallet CSV files containing private keys.
+- Protect the computer running NODAL and use a trusted RPC endpoint.
+- Always review transaction details before signing.
