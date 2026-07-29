@@ -33,7 +33,7 @@ def fix_privkeys(path: str):
         with open(path, newline="", encoding="utf-8") as f_in:
             reader = csv.DictReader(f_in)
             if not reader.fieldnames:
-                raise ValueError("CSV без заголовка. Нужен столбец 'privkey'.")
+                raise ValueError("The CSV has no header. A 'privkey' column is required.")
             fieldnames = list(reader.fieldnames)
             if "pubkey" not in fieldnames:
                 fieldnames.append("pubkey")
@@ -44,7 +44,7 @@ def fix_privkeys(path: str):
                     try:
                         arr = ast.literal_eval(v)
                         if not (isinstance(arr, list) and all(isinstance(x, int) and 0 <= x <= 255 for x in arr)):
-                            raise ValueError("privkey должен быть list[int 0..255]")
+                            raise ValueError("privkey must be a list[int 0..255]")
 
                         priv_base58, pub_base58 = keypair_from_array(arr)
                         row["privkey"] = priv_base58

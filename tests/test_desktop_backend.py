@@ -133,7 +133,7 @@ class DesktopTransactionTests(unittest.IsolatedAsyncioTestCase):
                 )
 
         self.assertEqual(response.status, 400)
-        self.assertIn("уже существует", json.loads(response.text)["error"])
+        self.assertIn("already exists", json.loads(response.text)["error"])
         set_key.assert_not_called()
 
     def test_legacy_log_dates_are_inferred_across_day_boundaries(self):
@@ -251,7 +251,7 @@ class DesktopTransactionTests(unittest.IsolatedAsyncioTestCase):
         entry = {
             "id": signature,
             "title": "Sender → Recipient",
-            "message": "Отправлено в сеть · 0.001000000 SOL",
+            "message": "Submitted · 0.001000000 SOL",
             "tone": "info",
             "status": "submitted",
         }

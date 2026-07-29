@@ -123,14 +123,14 @@ def _convert_private_key(value: str) -> tuple[str, str | None]:
     try:
         array = json.loads(raw)
     except json.JSONDecodeError as error:
-        raise ValueError("Приватный ключ в формате массива содержит ошибку.") from error
+        raise ValueError("The private key array is invalid.") from error
 
     if not (
         isinstance(array, list)
         and len(array) in {32, 64}
         and all(isinstance(item, int) and 0 <= item <= 255 for item in array)
     ):
-        raise ValueError("Приватный ключ должен содержать 32 или 64 байта.")
+        raise ValueError("The private key must contain 32 or 64 bytes.")
 
     keypair = Keypair.from_seed(bytes(array[:32]))
     return base58.b58encode(bytes(keypair)).decode("ascii"), str(keypair.pubkey())
@@ -143,14 +143,14 @@ def load_wallets(path: Path | None = None) -> tuple[list[Wallet], list[str]]:
     seen_private_keys: set[str] = set()
 
     if not source.exists():
-        return [], [f"Файл {source.name} не найден."]
+        return [], [f"File {source.name} was not found."]
 
     try:
         with source.open(newline="", encoding="utf-8-sig") as stream:
             reader = csv.DictReader(stream)
             fields = set(reader.fieldnames or [])
             if "privkey" not in fields:
-                return [], ["В CSV отсутствует обязательная колонка privkey."]
+                return [], ["The CSV is missing the required privkey column."]
 
             for index, row in enumerate(reader, start=1):
                 name = (row.get("name") or str(index)).strip() or str(index)
@@ -158,7 +158,7 @@ def load_wallets(path: Path | None = None) -> tuple[list[Wallet], list[str]]:
                 public_key = (row.get("pubkey") or "").strip()
 
                 if not private_key_raw:
-                    warnings.append(f"{name}: отсутствует приватный ключ.")
+                    warnings.append(f"{name}: private key is missing.")
                     continue
 
                 try:
@@ -171,16 +171,16 @@ def load_wallets(path: Path | None = None) -> tuple[list[Wallet], list[str]]:
                         expected_public_key = derived_public_key
                     if public_key and public_key != expected_public_key:
                         warnings.append(
-                            f"{name}: pubkey не совпадает с приватным ключом; "
-                            "использован вычисленный адрес."
+                            f"{name}: pubkey does not match the private key; "
+                            "the derived address was used."
                         )
                     public_key = expected_public_key
                 except Exception as error:
-                    warnings.append(f"{name}: некорректный приватный ключ ({error}).")
+                    warnings.append(f"{name}: invalid private key ({error}).")
                     continue
 
                 if private_key in seen_private_keys:
-                    warnings.append(f"{name}: дубликат кошелька пропущен.")
+                    warnings.append(f"{name}: duplicate wallet skipped.")
                     continue
                 seen_private_keys.add(private_key)
                 wallets.append(
@@ -192,7 +192,7 @@ def load_wallets(path: Path | None = None) -> tuple[list[Wallet], list[str]]:
                     )
                 )
     except (OSError, csv.Error) as error:
-        return [], [f"Не удалось прочитать {source.name}: {error}"]
+        return [], [f"Could not read {source.name}: {error}"]
 
     return wallets, warnings
 
@@ -269,18 +269,18 @@ async def _fetch_balances(
                     wallet_id, value = result
                     balances[wallet_id] = value
             if failures == len(wallets) and wallets:
-                return balances, "RPC не вернул баланс ни для одного кошелька.", latency_ms
+                return balances, "The RPC returned no wallet balances.", latency_ms
             if failures:
                 return (
                     balances,
-                    f"Не удалось обновить {failures} из {len(wallets)} балансов.",
+                    f"Could not update {failures} of {len(wallets)} balances.",
                     latency_ms,
                 )
     except Exception as error:
         latency_ms = round((time.perf_counter() - started) * 1000)
         return (
             {wallet.id: 0 for wallet in wallets},
-            f"RPC недоступен: {error}",
+            f"RPC unavailable: {error}",
             latency_ms,
         )
 
@@ -455,62 +455,59 @@ def _parse_cli_log_line(
                 "insufficient",
                 "invalid",
                 "rejected",
-                "не удалось",
-                "недостаточно",
-                "отклон",
             )
         )
     ):
         tone = "error"
-        title = "Ошибка приложения"
+        title = "Application error"
     elif (
         marker in {"✓", "+"}
-        or any(word in lowered for word in ("success", "confirmed", "completed", "успеш"))
+        or any(word in lowered for word in ("success", "confirmed", "completed"))
     ):
         tone = "success"
-        title = "Операция выполнена"
+        title = "Operation completed"
     else:
         tone = "info"
-        title = "Системное событие"
+        title = "System event"
 
     signature: str | None = None
     balance_match = re.fullmatch(
         r"Total balance of all wallets:\s*(.+)", message, flags=re.IGNORECASE
     )
     if balance_match:
-        title = "Баланс кошельков"
-        message = f"Общий баланс: {balance_match.group(1)}"
+        title = "Wallet balance"
+        message = f"Total balance: {balance_match.group(1)}"
     elif lowered == "program interrupted by user.":
-        title = "Работа остановлена"
-        message = "Работа программы остановлена пользователем"
+        title = "Operation stopped"
+        message = "The operation was stopped by the user"
     elif signature_match := re.fullmatch(
         r"Signature:\s*([1-9A-HJ-NP-Za-km-z]{64,88})", message, re.IGNORECASE
     ):
         signature = signature_match.group(1)
         tone = "success"
-        title = "Транзакция отправлена"
-        message = f"Сигнатура: {signature[:8]}…{signature[-8:]}"
+        title = "Transaction submitted"
+        message = f"Signature: {signature[:8]}…{signature[-8:]}"
     elif lowered == "transaction created successfully.":
         tone = "success"
-        title = "Транзакция создана"
-        message = "Транзакция создана и подписана"
+        title = "Transaction created"
+        message = "The transaction was created and signed"
     elif lowered == "waiting for transaction confirmation...":
-        title = "Ожидание подтверждения"
-        message = "Транзакция подтверждается в сети"
+        title = "Awaiting confirmation"
+        message = "The transaction is being confirmed by the network"
     elif lowered == "transaction confirmed.":
         tone = "success"
-        title = "Транзакция подтверждена"
-        message = "Сеть подтвердила транзакцию"
+        title = "Transaction confirmed"
+        message = "The network confirmed the transaction"
     elif receiver_balance_match := re.fullmatch(
         r"Receiver balance:\s*(.+)", message, re.IGNORECASE
     ):
-        title = "Баланс получателя"
-        message = f"После перевода: {receiver_balance_match.group(1)}"
+        title = "Recipient balance"
+        message = f"After transfer: {receiver_balance_match.group(1)}"
     elif total_amount_match := re.fullmatch(
         r"Total amount to send:\s*(.+)", message, re.IGNORECASE
     ):
-        title = "Сумма операции"
-        message = f"К отправке: {total_amount_match.group(1)}"
+        title = "Operation amount"
+        message = f"To send: {total_amount_match.group(1)}"
 
     digest = hashlib.sha256(f"{index}:{raw}".encode("utf-8")).hexdigest()[:16]
     entry: dict[str, Any] = {
@@ -560,7 +557,7 @@ async def _refresh_pending_transactions() -> None:
                     entry["tone"] = "error"
                     entry["status"] = "failed"
                     entry["message"] = (
-                        f"Транзакция отклонена · {pending['amount']:.9f} SOL"
+                        f"Transaction rejected · {pending['amount']:.9f} SOL"
                     )
                     entry["error"] = str(status.err)
                     completed.add(signature)
@@ -571,14 +568,14 @@ async def _refresh_pending_transactions() -> None:
                     entry["tone"] = "success"
                     entry["status"] = "finalized"
                     entry["message"] = (
-                        f"Финализировано · {pending['amount']:.9f} SOL"
+                        f"Finalized · {pending['amount']:.9f} SOL"
                     )
                     completed.add(signature)
                 elif "confirmed" in confirmation:
                     entry["tone"] = "success"
                     entry["status"] = "confirmed"
                     entry["message"] = (
-                        f"Подтверждено сетью · {pending['amount']:.9f} SOL"
+                        f"Confirmed by network · {pending['amount']:.9f} SOL"
                     )
 
         for signature in completed:
@@ -619,7 +616,7 @@ def _validate_rpc_url(value: str) -> str:
     value = value.strip()
     parsed = urlparse(value)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
-        raise ValueError("RPC должен быть корректным HTTP(S)-адресом.")
+        raise ValueError("RPC must be a valid HTTP(S) URL.")
     return value
 
 
@@ -631,7 +628,7 @@ async def rpc_test_handler(request: web.Request) -> web.Response:
     except ValueError as error:
         return _json_error(str(error))
     except Exception as error:
-        return _json_error(f"Не удалось подключиться к RPC: {error}", 502)
+        return _json_error(f"Could not connect to RPC: {error}", 502)
 
 
 async def rpc_save_handler(request: web.Request) -> web.Response:
@@ -641,7 +638,7 @@ async def rpc_save_handler(request: web.Request) -> web.Response:
         try:
             rpc_details = await _probe_rpc(url)
         except Exception as error:
-            return _json_error(f"Не удалось подключиться к RPC: {error}", 502)
+            return _json_error(f"Could not connect to RPC: {error}", 502)
         set_key(str(ENV_FILE), "RPC_URL", url)
         STATE.balance_cache.clear()
         return web.json_response(
@@ -650,7 +647,7 @@ async def rpc_save_handler(request: web.Request) -> web.Response:
     except ValueError as error:
         return _json_error(str(error))
     except OSError as error:
-        return _json_error(f"Не удалось сохранить .env: {error}", 500)
+        return _json_error(f"Could not save .env: {error}", 500)
 
 
 async def wallet_file_select_handler(request: web.Request) -> web.Response:
@@ -658,10 +655,10 @@ async def wallet_file_select_handler(request: web.Request) -> web.Response:
         payload = await request.json()
         name = Path(str(payload.get("name", ""))).name
         if not name or name != payload.get("name") or not name.endswith(".csv"):
-            raise ValueError("Некорректное имя CSV-файла.")
+            raise ValueError("Invalid CSV filename.")
         path = DATA_DIR / name
         if not path.exists():
-            raise ValueError(f"Файл {name} не найден.")
+            raise ValueError(f"File {name} was not found.")
         wallets, warnings = load_wallets(path)
         if warnings and not wallets:
             raise ValueError(warnings[0])
@@ -686,9 +683,9 @@ def _new_wallet_file_name(value: str) -> str:
         raw = raw[:-4]
     stem = re.sub(r'[<>:"/\\|?*\x00-\x1f]+', "-", raw).strip(" .-")
     if not stem:
-        raise ValueError("Укажи название файла.")
+        raise ValueError("Enter a filename.")
     if len(stem) > 80:
-        raise ValueError("Название файла должно быть короче 80 символов.")
+        raise ValueError("The filename must be under 80 characters.")
     return f"{stem}.csv"
 
 
@@ -699,7 +696,7 @@ async def wallet_file_create_handler(request: web.Request) -> web.Response:
         destination = DATA_DIR / name
         async with STATE.wallet_file_lock:
             if destination.exists():
-                raise ValueError(f"Файл {name} уже существует.")
+                raise ValueError(f"File {name} already exists.")
             _write_wallet_rows(destination, ["name", "pubkey", "privkey"], [])
             try:
                 set_key(str(ENV_FILE), "CSV_FILE", name)
@@ -713,7 +710,7 @@ async def wallet_file_create_handler(request: web.Request) -> web.Response:
     except ValueError as error:
         return _json_error(str(error))
     except OSError as error:
-        return _json_error(f"Не удалось создать CSV-файл: {error}", 500)
+        return _json_error(f"Could not create the CSV file: {error}", 500)
 
 
 async def wallet_file_import_handler(request: web.Request) -> web.Response:
@@ -721,9 +718,9 @@ async def wallet_file_import_handler(request: web.Request) -> web.Response:
         reader = await request.multipart()
         part = await reader.next()
         if part is None or part.name != "file" or not part.filename:
-            raise ValueError("Выбери CSV-файл для импорта.")
+            raise ValueError("Select a CSV file to import.")
         if not part.filename.lower().endswith(".csv"):
-            raise ValueError("Поддерживаются только CSV-файлы.")
+            raise ValueError("Only CSV files are supported.")
 
         name = _safe_upload_name(part.filename)
         destination = DATA_DIR / name
@@ -738,14 +735,14 @@ async def wallet_file_import_handler(request: web.Request) -> web.Response:
                     break
                 size += len(chunk)
                 if size > MAX_UPLOAD_BYTES:
-                    raise ValueError("CSV-файл больше 5 МБ.")
+                    raise ValueError("The CSV file exceeds 5 MB.")
                 stream.write(chunk)
 
         _deduplicate_wallet_rows(temporary)
         wallets, warnings = load_wallets(temporary)
         if not wallets:
             temporary.unlink(missing_ok=True)
-            raise ValueError(warnings[0] if warnings else "В CSV нет кошельков.")
+            raise ValueError(warnings[0] if warnings else "The CSV contains no wallets.")
         shutil.move(str(temporary), str(destination))
         set_key(str(ENV_FILE), "CSV_FILE", destination.name)
         STATE.balance_cache.clear()
@@ -760,7 +757,7 @@ async def wallet_file_import_handler(request: web.Request) -> web.Response:
     except ValueError as error:
         return _json_error(str(error))
     except Exception as error:
-        return _json_error(f"Не удалось импортировать файл: {error}", 500)
+        return _json_error(f"Could not import the file: {error}", 500)
 
 
 def _wallet_row_public_key(row: dict[str, str]) -> str:
@@ -778,7 +775,7 @@ def _read_wallet_rows(path: Path) -> tuple[list[str], list[dict[str, str]]]:
         reader = csv.DictReader(stream)
         fieldnames = list(reader.fieldnames or [])
         if "privkey" not in fieldnames:
-            raise ValueError("В CSV отсутствует обязательная колонка privkey.")
+            raise ValueError("The CSV is missing the required privkey column.")
         rows = [
             {field: str(row.get(field) or "") for field in fieldnames}
             for row in reader
@@ -794,7 +791,7 @@ def _find_wallet_row(rows: list[dict[str, str]], wallet_id: str) -> int:
             continue
         if public_key and _wallet_id(index, public_key) == wallet_id:
             return index - 1
-    raise ValueError("Кошелёк не найден в активном CSV-файле.")
+    raise ValueError("Wallet not found in the active CSV file.")
 
 
 def _write_wallet_rows(
@@ -839,11 +836,11 @@ async def wallet_create_handler(request: web.Request) -> web.Response:
         name = str(payload.get("name", "")).strip()
         private_key_raw = str(payload.get("privkey", "")).strip()
         if not name:
-            raise ValueError("Название кошелька не может быть пустым.")
+            raise ValueError("Wallet name cannot be empty.")
         if len(name) > 80 or any(character in name for character in "\r\n"):
-            raise ValueError("Название должно быть короче 80 символов и занимать одну строку.")
+            raise ValueError("The name must be a single line under 80 characters.")
         if not private_key_raw:
-            raise ValueError("Укажи приватный ключ.")
+            raise ValueError("Enter a private key.")
 
         private_key, derived_public_key = _convert_private_key(private_key_raw)
         keypair = Keypair.from_base58_string(private_key)
@@ -858,7 +855,7 @@ async def wallet_create_handler(request: web.Request) -> web.Response:
                 except Exception:
                     continue
                 if existing_public_key == public_key:
-                    raise ValueError("Этот кошелёк уже есть в активном CSV-файле.")
+                    raise ValueError("This wallet already exists in the active CSV file.")
 
             for field in ("name", "pubkey"):
                 if field not in fieldnames:
@@ -878,7 +875,7 @@ async def wallet_create_handler(request: web.Request) -> web.Response:
     except ValueError as error:
         return _json_error(str(error))
     except Exception as error:
-        return _json_error(f"Не удалось добавить кошелёк: {error}")
+        return _json_error(f"Could not add the wallet: {error}")
 
 
 async def wallet_update_handler(request: web.Request) -> web.Response:
@@ -887,11 +884,11 @@ async def wallet_update_handler(request: web.Request) -> web.Response:
         wallet_id = str(payload.get("id", "")).strip()
         name = str(payload.get("name", "")).strip()
         if not wallet_id:
-            raise ValueError("Не указан кошелёк.")
+            raise ValueError("No wallet was specified.")
         if not name:
-            raise ValueError("Название кошелька не может быть пустым.")
+            raise ValueError("Wallet name cannot be empty.")
         if len(name) > 80 or any(character in name for character in "\r\n"):
-            raise ValueError("Название должно быть короче 80 символов и занимать одну строку.")
+            raise ValueError("The name must be a single line under 80 characters.")
 
         async with STATE.wallet_file_lock:
             path = wallet_file_path()
@@ -909,7 +906,7 @@ async def wallet_update_handler(request: web.Request) -> web.Response:
     except (ValueError, csv.Error) as error:
         return _json_error(str(error))
     except OSError as error:
-        return _json_error(f"Не удалось изменить CSV-файл: {error}", 500)
+        return _json_error(f"Could not update the CSV file: {error}", 500)
 
 
 async def wallet_delete_handler(request: web.Request) -> web.Response:
@@ -917,7 +914,7 @@ async def wallet_delete_handler(request: web.Request) -> web.Response:
         payload = await request.json()
         wallet_id = str(payload.get("id", "")).strip()
         if not wallet_id:
-            raise ValueError("Не указан кошелёк.")
+            raise ValueError("No wallet was specified.")
 
         async with STATE.wallet_file_lock:
             path = wallet_file_path()
@@ -931,7 +928,7 @@ async def wallet_delete_handler(request: web.Request) -> web.Response:
     except (ValueError, csv.Error) as error:
         return _json_error(str(error))
     except OSError as error:
-        return _json_error(f"Не удалось изменить CSV-файл: {error}", 500)
+        return _json_error(f"Could not update the CSV file: {error}", 500)
 
 
 def _parse_amount(value: Any) -> tuple[float, bool]:
@@ -942,13 +939,13 @@ def _parse_amount(value: Any) -> tuple[float, bool]:
     try:
         amount = float(raw)
     except ValueError as error:
-        raise ValueError("Укажи корректную сумму.") from error
+        raise ValueError("Enter a valid amount.") from error
     if not math.isfinite(amount) or amount <= 0:
-        raise ValueError("Сумма должна быть больше нуля.")
+        raise ValueError("The amount must be greater than zero.")
     if is_percent and amount > 100:
-        raise ValueError("Процент должен быть в диапазоне от 0 до 100.")
+        raise ValueError("Percentage must be between 0 and 100.")
     if not is_percent and amount <= 0.000005:
-        raise ValueError("Минимальная сумма — больше 0.000005 SOL.")
+        raise ValueError("The minimum amount is greater than 0.000005 SOL.")
     return amount, is_percent
 
 
@@ -959,7 +956,7 @@ def _get_wallet_map() -> tuple[dict[str, Wallet], list[str]]:
 
 def _wallets_by_ids(wallet_map: dict[str, Wallet], ids: Any) -> list[Wallet]:
     if not isinstance(ids, list):
-        raise ValueError("Некорректный список кошельков.")
+        raise ValueError("Invalid wallet list.")
     result = []
     seen = set()
     for wallet_id in ids:
@@ -967,7 +964,7 @@ def _wallets_by_ids(wallet_map: dict[str, Wallet], ids: Any) -> list[Wallet]:
             continue
         wallet = wallet_map.get(str(wallet_id))
         if not wallet:
-            raise ValueError("Один из выбранных кошельков больше не существует.")
+            raise ValueError("One of the selected wallets no longer exists.")
         seen.add(wallet_id)
         result.append(wallet)
     return result
@@ -980,13 +977,13 @@ def _recipient_from_payload(
     if recipient_id:
         wallet = wallet_map.get(recipient_id)
         if not wallet:
-            raise ValueError("Кошелёк получателя не найден.")
+            raise ValueError("Recipient wallet not found.")
         return wallet.pubkey, wallet.name
     address = str(payload.get("recipient_address", "")).strip()
     try:
         Pubkey.from_string(address)
     except Exception as error:
-        raise ValueError("Укажи корректный Solana-адрес получателя.") from error
+        raise ValueError("Enter a valid Solana recipient address.") from error
     return address, _short_address(address)
 
 
@@ -1017,19 +1014,19 @@ async def _build_preview(payload: dict[str, Any]) -> Preview:
     mode = str(payload.get("mode", "single"))
     wallet_map, _ = _get_wallet_map()
     if not wallet_map:
-        raise ValueError("Сначала добавь хотя бы один кошелёк.")
+        raise ValueError("Add at least one wallet first.")
     url = rpc_url()
     transfers: list[dict[str, Any]] = []
 
     if mode in {"single", "consolidate"}:
         sources = _wallets_by_ids(wallet_map, payload.get("source_ids", []))
         if mode == "single" and len(sources) != 1:
-            raise ValueError("Выбери один кошелёк-отправитель.")
+            raise ValueError("Select one sender wallet.")
         if mode == "consolidate" and not sources:
-            raise ValueError("Выбери кошельки-источники.")
+            raise ValueError("Select source wallets.")
         recipient, recipient_label = _recipient_from_payload(payload, wallet_map)
         if any(source.pubkey == recipient for source in sources):
-            raise ValueError("Получатель не может совпадать с отправителем.")
+            raise ValueError("The recipient cannot be the sender.")
         amount, is_percent = _parse_amount(payload.get("amount"))
         balances = await _source_balances(sources, url)
         for source in sources:
@@ -1041,7 +1038,7 @@ async def _build_preview(payload: dict[str, Any]) -> Preview:
                 else int(amount * LAMPORTS_PER_SOL)
             )
             if lamports <= 0 or lamports + TRANSACTION_FEE_LAMPORTS > balance:
-                raise ValueError(f"Недостаточно SOL на кошельке «{source.name}».")
+                raise ValueError(f"Insufficient SOL in wallet '{source.name}'.")
             transfers.append(
                 _make_transfer(source, recipient, recipient_label, lamports)
             )
@@ -1052,23 +1049,23 @@ async def _build_preview(payload: dict[str, Any]) -> Preview:
             wallet_map, payload.get("destination_ids", [])
         )
         if len(sources) != 1:
-            raise ValueError("Выбери один кошелёк-отправитель.")
+            raise ValueError("Select one sender wallet.")
         if not destinations:
-            raise ValueError("Выбери хотя бы одного получателя.")
+            raise ValueError("Select at least one recipient.")
         source = sources[0]
         destinations = [item for item in destinations if item.id != source.id]
         if not destinations:
-            raise ValueError("Отправитель не может быть единственным получателем.")
+            raise ValueError("The sender cannot be the only recipient.")
         amount, is_percent = _parse_amount(payload.get("amount"))
         if is_percent:
-            raise ValueError("Для массовой отправки укажи сумму в SOL на получателя.")
+            raise ValueError("Enter a SOL amount per recipient for batch distribution.")
         lamports = int(amount * LAMPORTS_PER_SOL)
         balances = await _source_balances([source], url)
         total_cost = len(destinations) * (lamports + TRANSACTION_FEE_LAMPORTS)
         if total_cost > balances[source.id]:
             required = total_cost / LAMPORTS_PER_SOL
             raise ValueError(
-                f"Недостаточно SOL: потребуется примерно {required:.6f} SOL с комиссиями."
+                f"Insufficient SOL: approximately {required:.6f} SOL is required including fees."
             )
         transfers.extend(
             _make_transfer(source, item.pubkey, item.name, lamports)
@@ -1078,7 +1075,7 @@ async def _build_preview(payload: dict[str, Any]) -> Preview:
     elif mode == "equalize":
         wallets = _wallets_by_ids(wallet_map, payload.get("source_ids", []))
         if len(wallets) < 2:
-            raise ValueError("Для выравнивания выбери минимум два кошелька.")
+            raise ValueError("Select at least two wallets to equalize.")
         balances = await _source_balances(wallets, url)
         target = sum(balances.values()) // len(wallets)
         donors = [
@@ -1109,9 +1106,9 @@ async def _build_preview(payload: dict[str, Any]) -> Preview:
                 elif amount <= 0:
                     donor_index += 1
         if not transfers:
-            raise ValueError("Балансы уже выровнены или недостаточны для комиссий.")
+            raise ValueError("Balances are already equal or insufficient to cover fees.")
     else:
-        raise ValueError("Неизвестный режим перевода.")
+        raise ValueError("Unknown transfer mode.")
 
     network = await _resolve_rpc_network(url)
     return Preview(
@@ -1143,8 +1140,8 @@ def _public_preview(preview_id: str, preview: Preview) -> dict[str, Any]:
                 "code": "external-recipient",
                 "severity": "danger",
                 "message": (
-                    "Среди получателей есть внешний адрес. Сверь его полностью "
-                    "перед отправкой."
+                    "The recipients include an external address. Verify the full address "
+                    "before sending."
                 ),
             }
         )
@@ -1153,7 +1150,7 @@ def _public_preview(preview_id: str, preview: Preview) -> dict[str, Any]:
             {
                 "code": "mainnet",
                 "severity": "warning",
-                "message": "Операция будет выполнена в основной сети Mainnet.",
+                "message": "This operation will run on Mainnet.",
             }
         )
     if len(preview.transfers) > 1:
@@ -1162,8 +1159,8 @@ def _public_preview(preview_id: str, preview: Preview) -> dict[str, Any]:
                 "code": "batch",
                 "severity": "warning",
                 "message": (
-                    f"Будет отправлено транзакций: {len(preview.transfers)}. "
-                    "Каждая из них необратима."
+                    f"{len(preview.transfers)} transactions will be submitted. "
+                    "Each transaction is irreversible."
                 ),
             }
         )
@@ -1188,7 +1185,7 @@ async def transaction_preview_handler(request: web.Request) -> web.Response:
     try:
         payload = await request.json()
         if not isinstance(payload, dict):
-            raise ValueError("Некорректные параметры перевода.")
+            raise ValueError("Invalid transfer parameters.")
         preview = await _build_preview(payload)
         preview_id = secrets.token_urlsafe(24)
         STATE.previews = {
@@ -1202,7 +1199,7 @@ async def transaction_preview_handler(request: web.Request) -> web.Response:
         return _json_error(str(error))
     except Exception as error:
         logger.exception("Failed to build transaction preview")
-        return _json_error(f"Не удалось подготовить перевод: {error}", 500)
+        return _json_error(f"Could not prepare the transfer: {error}", 500)
 
 
 async def _submit_transfer(
@@ -1234,16 +1231,16 @@ async def transaction_send_handler(request: web.Request) -> web.Response:
         preview = STATE.previews.pop(preview_id, None)
         if not preview:
             return _json_error(
-                "Предпросмотр истёк. Подготовь перевод ещё раз.",
+                "The preview expired. Prepare the transfer again.",
                 code="preview_expired",
             )
         if time.time() - preview.created_at >= PREVIEW_TTL_SECONDS:
             return _json_error(
-                "Предпросмотр истёк. Подготовь перевод ещё раз.",
+                "The preview expired. Prepare the transfer again.",
                 code="preview_expired",
             )
         if preview.wallet_file != wallet_file_name() or preview.rpc_url != rpc_url():
-            raise ValueError("Настройки изменились. Подготовь перевод заново.")
+            raise ValueError("Settings changed. Prepare the transfer again.")
 
         wallet_map, _ = _get_wallet_map()
         operation_id = secrets.token_hex(8)
@@ -1253,7 +1250,7 @@ async def transaction_send_handler(request: web.Request) -> web.Response:
             for item in preview.transfers:
                 wallet = wallet_map.get(item["sender_id"])
                 if not wallet or wallet.pubkey != item["sender_pubkey"]:
-                    raise ValueError("Состав кошельков изменился. Подготовь перевод заново.")
+                    raise ValueError("The wallet set changed. Prepare the transfer again.")
                 try:
                     signature = await _submit_transfer(
                         client,
@@ -1277,7 +1274,7 @@ async def transaction_send_handler(request: web.Request) -> web.Response:
                             "id": secrets.token_hex(8),
                             "timestamp": datetime.now(timezone.utc).isoformat(),
                             "title": f"{wallet.name} → {item['recipient_label']}",
-                            "message": f"Не отправлено · {item['amount']:.9f} SOL",
+                            "message": f"Not submitted · {item['amount']:.9f} SOL",
                             "tone": "error",
                             "status": "failed",
                             "error": error_message,
@@ -1291,7 +1288,7 @@ async def transaction_send_handler(request: web.Request) -> web.Response:
                     "id": signature,
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "title": f"{wallet.name} → {item['recipient_label']}",
-                    "message": f"Отправлено в сеть · {item['amount']:.9f} SOL",
+                    "message": f"Submitted · {item['amount']:.9f} SOL",
                     "tone": "info",
                     "status": "submitted",
                     "source": "desktop",
@@ -1332,7 +1329,7 @@ async def transaction_send_handler(request: web.Request) -> web.Response:
                 retry_preview_id, retry_preview
             )
             response_payload["error"] = (
-                f"Не отправлено транзакций: {len(failed_items)} из "
+                f"Transactions not submitted: {len(failed_items)} of "
                 f"{len(preview.transfers)}."
             )
         return web.json_response(response_payload)
@@ -1344,13 +1341,13 @@ async def transaction_send_handler(request: web.Request) -> web.Response:
             {
                 "id": secrets.token_hex(8),
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "title": "Перевод не выполнен",
+                "title": "Transfer failed",
                 "message": str(error),
                 "tone": "error",
                 "source": "desktop",
             }
         )
-        return _json_error(f"Транзакция отклонена: {error}", 502)
+        return _json_error(f"Transaction rejected: {error}", 502)
 
 
 @web.middleware
