@@ -1,25 +1,45 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Tektur:wdth,wght@75..100,400..700&display=swap');
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: Inter, 'Avenir Next', 'Segoe UI', sans-serif;
-  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --font-sans: Tektur, 'Arial Narrow', 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
 
-  --color-app: #1b1b20;
-  --color-surface: #232329;
-  --color-raised: #292830;
-  --color-muted: #2c2b33;
-  --color-soft: #32313a;
-  --color-sidebar: #202026;
-  --color-ink: #f4f0ff;
-  --color-copy: #d7cff0;
-  --color-dim: #aaa3bc;
-  --color-faint: #827b92;
-  --color-line: #45414f;
-  --color-line-strong: #5e576d;
-  --color-line-soft: #35333d;
-  --color-primary: #b8a7f0;
-  --color-primary-strong: #a994eb;
-  --color-warning: #f0bf63;
-  --color-danger: #ff7f6f;
+  --color-app: #e2e0d9;
+  --color-surface: #efede7;
+  --color-raised: #e5e3dc;
+  --color-muted: #d7d4cb;
+  --color-soft: #cbc7bc;
+  --color-sidebar: #d4d1c8;
+  --color-ink: #514c3f;
+  --color-copy: #625c4d;
+  --color-dim: #7c7564;
+  --color-faint: #999284;
+  --color-line: #aaa496;
+  --color-line-strong: #746d5b;
+  --color-line-soft: #c8c4b9;
+  --color-primary: #e7652d;
+  --color-primary-strong: #c94e1f;
+  --color-solana: #8b5cf6;
+  --color-warning: #b87824;
+  --color-danger: #b94b3a;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    background-color: var(--color-app);
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.12) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  ::selection {
+    background: rgb(231 101 45 / 0.24);
+    color: var(--color-ink);
+  }
 }

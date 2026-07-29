@@ -72,7 +72,7 @@ async function startBackend(): Promise<void> {
     }
     await new Promise((resolve) => setTimeout(resolve, 350));
   }
-  throw new Error('Backend не запустился. Проверь Python-окружение и requirements.txt.');
+  throw new Error('The backend did not start. Check the Python environment and requirements.txt.');
 }
 
 function createWindow(): BrowserWindow {
@@ -82,8 +82,8 @@ function createWindow(): BrowserWindow {
     height: 940,
     minWidth: 1040,
     minHeight: 720,
-    backgroundColor: '#232329',
-    title: 'Solana Wallet',
+    backgroundColor: '#e2e0d9',
+    title: 'NODAL — Solana Operations Desk',
     show: false,
     webPreferences: {
       contextIsolation: true,
@@ -130,7 +130,7 @@ app.whenReady().then(async () => {
     await startBackend();
     createWindow();
   } catch (error) {
-    dialog.showErrorBox('Solana Wallet', String(error));
+    dialog.showErrorBox('NODAL', String(error));
     app.quit();
   }
 });

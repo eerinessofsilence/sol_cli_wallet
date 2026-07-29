@@ -23,7 +23,7 @@ def main() -> None:
         print("Desktop dependencies are missing. Run: cd desktop-ui && npm install")
         raise SystemExit(1)
 
-    print("Starting Solana Wallet desktop…", flush=True)
+    print("Starting NODAL desktop…", flush=True)
     subprocess.run(
         [resolve_npm(), "run", "dev"],
         cwd=desktop_ui,

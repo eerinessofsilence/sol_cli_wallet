@@ -17,7 +17,6 @@ import {
   FilePlus2,
   FileUp,
   FolderOpen,
-  Gauge,
   LayoutDashboard,
   LoaderCircle,
   Network,
@@ -65,11 +64,11 @@ import type {
 } from './types';
 
 const navItems: Array<{ id: PageId; label: string; icon: LucideIcon }> = [
-  { id: 'overview', label: 'Обзор', icon: LayoutDashboard },
-  { id: 'wallets', label: 'Кошельки', icon: WalletCards },
-  { id: 'operations', label: 'Операции', icon: SlidersHorizontal },
-  { id: 'activity', label: 'Активность', icon: Activity },
-  { id: 'settings', label: 'Настройки', icon: Settings },
+  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+  { id: 'wallets', label: 'Wallets', icon: WalletCards },
+  { id: 'operations', label: 'Operations', icon: SlidersHorizontal },
+  { id: 'activity', label: 'Activity', icon: Activity },
+  { id: 'settings', label: 'Settings', icon: Settings },
 ];
 const primaryNavItems = navItems.filter((item) => item.id !== 'settings');
 const settingsNavItem = navItems.find((item) => item.id === 'settings')!;
@@ -79,17 +78,18 @@ const rpcPresets = [
   { id: 'testnet', label: 'Testnet', url: 'https://api.testnet.solana.com' },
 ] as const;
 const estimatedTransferFee = 0.000005;
+const nodalLogoUrl = `${import.meta.env.BASE_URL}nodal-logo.png`;
 
 const pageIds = new Set(navItems.map((item) => item.id));
-const solFormatter = new Intl.NumberFormat('ru-RU', {
+const solFormatter = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 0,
   maximumFractionDigits: 9,
 });
-const compactSolFormatter = new Intl.NumberFormat('ru-RU', {
+const compactSolFormatter = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 0,
   maximumFractionDigits: 4,
 });
-const portfolioPercentFormatter = new Intl.NumberFormat('ru-RU', {
+const portfolioPercentFormatter = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 0,
   maximumFractionDigits: 1,
 });
@@ -103,38 +103,28 @@ function formatAmountInput(value: number) {
 }
 
 function formatWalletLabel(value: string) {
-  return /^[0-9]+$/.test(value) ? `Кошелёк ${value}` : value;
+  return /^[0-9]+$/.test(value) ? `Wallet ${value}` : value;
 }
 
 function formatUpdatedAt(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
-  return new Intl.DateTimeFormat('ru-RU', {
+  return new Intl.DateTimeFormat('en-US', {
     hour: '2-digit',
     minute: '2-digit',
   }).format(date);
 }
 
 function formatWalletCount(value: number) {
-  const lastTwoDigits = value % 100;
-  const lastDigit = value % 10;
-  const noun =
-    lastTwoDigits >= 11 && lastTwoDigits <= 14
-      ? 'кошельков'
-      : lastDigit === 1
-        ? 'кошелёк'
-        : lastDigit >= 2 && lastDigit <= 4
-          ? 'кошелька'
-          : 'кошельков';
-  return `${value} ${noun}`;
+  return `${value} ${value === 1 ? 'wallet' : 'wallets'}`;
 }
 
 function formatActivityTime(value: string) {
-  if (!value) return 'Время не указано';
+  if (!value) return 'Time unavailable';
   if (/^\d{2}:\d{2}:\d{2}$/.test(value)) return value;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  const parts = new Intl.DateTimeFormat('ru-RU', {
+  const parts = new Intl.DateTimeFormat('en-US', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -149,26 +139,6 @@ function formatActivityTime(value: string) {
       return result;
     }, {});
   return `${parts.day}.${parts.month}.${parts.year} ${parts.hour}:${parts.minute}:${parts.second}`;
-}
-
-function formatFileSize(value: number) {
-  if (value < 1_024) return `${value} Б`;
-  if (value < 1_024 ** 2)
-    return `${(value / 1_024).toLocaleString('ru-RU', { maximumFractionDigits: 1 })} КБ`;
-  return `${(value / 1_024 ** 2).toLocaleString('ru-RU', { maximumFractionDigits: 1 })} МБ`;
-}
-
-function formatFileModifiedAt(value: string | null) {
-  if (!value) return 'дата изменения неизвестна';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'дата изменения неизвестна';
-  return `изменён ${new Intl.DateTimeFormat('ru-RU', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date)}`;
 }
 
 function getInitialPage(): PageId {
@@ -198,7 +168,7 @@ function Button({
 }) {
   return (
     <button
-      className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-[9px] border text-[13px] font-semibold transition duration-150 disabled:cursor-not-allowed disabled:opacity-45 ${compact ? 'min-h-9 px-3' : 'min-h-10 px-3.5'} ${variant === 'solid' ? (tone === 'danger' ? 'border-danger bg-danger text-surface hover:brightness-105' : 'border-primary bg-primary text-surface hover:border-primary-strong hover:bg-primary-strong') : variant === 'ghost' ? 'border-transparent bg-transparent text-dim hover:bg-muted hover:text-ink' : tone === 'danger' ? 'border-danger/25 bg-danger/10 text-danger hover:border-danger/40' : 'border-line bg-raised text-copy hover:border-line-strong hover:bg-muted'} ${className}`}
+      className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-[4px] border text-[12px] font-semibold tracking-[0.035em] uppercase transition duration-150 disabled:cursor-not-allowed disabled:opacity-45 ${compact ? 'min-h-9 px-3' : 'min-h-10 px-3.5'} ${variant === 'solid' ? (tone === 'danger' ? 'border-danger bg-danger text-surface hover:brightness-105' : 'border-primary bg-primary text-surface hover:border-primary-strong hover:bg-primary-strong') : variant === 'ghost' ? 'border-transparent bg-transparent text-dim hover:bg-muted hover:text-ink' : tone === 'danger' ? 'border-danger/25 bg-danger/10 text-danger hover:border-danger/40' : 'border-line bg-raised text-copy hover:border-line-strong hover:bg-muted'} ${className}`}
       type="button"
       {...props}
     >
@@ -220,7 +190,7 @@ function PageHeader({
   return (
     <header className="flex items-start justify-between gap-6 max-[680px]:flex-col max-[680px]:items-stretch">
       <div>
-        <h1 className="m-0 text-[28px] leading-tight font-bold tracking-[-0.035em] text-ink">
+        <h1 className="m-0 text-[27px] leading-tight font-bold tracking-[0.06em] text-primary uppercase">
           {title}
         </h1>
         {description ? <p className="mt-2 mb-0 text-sm text-dim">{description}</p> : null}
@@ -247,14 +217,18 @@ function Panel({
 }) {
   return (
     <section
-      className={`rounded-[13px] border border-line-soft bg-surface ${compact ? 'p-4' : 'p-5'} ${className}`}
+      className={`rounded-[4px] border border-line bg-surface ${compact ? 'p-4' : 'p-5'} ${className}`}
     >
       {title || actions ? (
         <div
           className={`${compact ? 'mb-3' : 'mb-4'} flex items-center justify-between gap-4 max-[680px]:flex-col max-[680px]:items-stretch`}
         >
           <div>
-            {title ? <h2 className="m-0 text-[17px] font-bold text-ink">{title}</h2> : null}
+            {title ? (
+              <h2 className="m-0 text-[14px] font-bold tracking-[0.045em] text-primary uppercase">
+                {title}
+              </h2>
+            ) : null}
             {subtitle ? (
               <p className={`${compact ? 'mt-1' : 'mt-1.5'} mb-0 text-xs leading-relaxed text-dim`}>
                 {subtitle}
@@ -273,15 +247,17 @@ function MetricCard({
   icon: Icon,
   label,
   value,
+  detail,
 }: {
   icon: LucideIcon;
   label: string;
-  value: string;
+  value: ReactNode;
+  detail?: ReactNode;
 }) {
   return (
-    <article className="relative flex flex-col gap-4 overflow-hidden rounded-[13px] border border-line-soft bg-surface p-4 text-primary before:pointer-events-none before:absolute before:-top-17.5 before:-left-12.5 before:h-37.5 before:w-37.5 before:rounded-full before:bg-current before:opacity-[0.08] before:blur-[55px]">
+    <article className="relative flex flex-col gap-4 overflow-hidden rounded-[4px] border border-line bg-surface p-4 text-primary before:pointer-events-none before:absolute before:top-0 before:right-0 before:left-0 before:h-1 before:bg-current">
       <div className="flex items-center gap-2.5 text-sm font-bold tracking-[-0.01em] text-copy">
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] bg-primary/15 text-primary">
+        <span className="inline-flex h-10 w-10 items-center justify-center rounded-[3px] border border-primary/35 bg-primary/10 text-primary">
           <Icon size={24} />
         </span>
         <span>{label}</span>
@@ -289,6 +265,7 @@ function MetricCard({
       <strong className="z-10 overflow-hidden text-2xl leading-tight font-semibold tracking-[-0.035em] text-ellipsis whitespace-nowrap text-ink">
         {value}
       </strong>
+      {detail ? <span className="-mt-2 text-xs leading-relaxed text-dim">{detail}</span> : null}
     </article>
   );
 }
@@ -305,7 +282,7 @@ function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex min-h-[220px] flex-col items-center justify-center rounded-[11px] border border-dashed border-line bg-muted/45 p-[30px] text-center">
+    <div className="flex min-h-[220px] flex-col items-center justify-center rounded-[4px] border border-dashed border-line bg-muted/45 p-[30px] text-center">
       <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 text-primary">
         <Icon size={26} />
       </span>
@@ -322,7 +299,7 @@ function WalletSelect({
   onChange,
   detailed = false,
   excludeIds = [],
-  placeholder = 'Выбери кошелёк',
+  placeholder = 'Select a wallet',
 }: {
   wallets: WalletRow[];
   value: string;
@@ -367,7 +344,7 @@ function WalletSelect({
               <span className="min-w-0 flex-1">
                 <strong className="block truncate text-[13px] font-semibold text-copy">
                   {/^[0-9]+$/.test(selectedWallet.name)
-                    ? `Кошелёк ${selectedWallet.name}`
+                    ? `Wallet ${selectedWallet.name}`
                     : selectedWallet.name}
                 </strong>
                 <small className="mt-0.5 block truncate font-mono text-[11px] text-faint">
@@ -382,7 +359,7 @@ function WalletSelect({
             <>
               <span className="min-w-0 flex-1 overflow-hidden text-sm font-medium text-ellipsis whitespace-nowrap text-ink">
                 {/^[0-9]+$/.test(selectedWallet.name)
-                  ? `Кошелёк ${selectedWallet.name}`
+                  ? `Wallet ${selectedWallet.name}`
                   : selectedWallet.name}
               </span>
               <span className="shrink-0 text-sm font-medium text-dim tabular-nums">
@@ -418,7 +395,7 @@ function WalletSelect({
               >
                 <span className="min-w-0">
                   <strong className="block overflow-hidden text-[13px] font-semibold text-ellipsis whitespace-nowrap text-copy">
-                    {/^[0-9]+$/.test(wallet.name) ? `Кошелёк ${wallet.name}` : wallet.name}
+                    {/^[0-9]+$/.test(wallet.name) ? `Wallet ${wallet.name}` : wallet.name}
                   </strong>
                   <small className="mt-0.5 block overflow-hidden font-mono text-xs text-ellipsis whitespace-nowrap text-faint">
                     {wallet.short_address}
@@ -431,7 +408,7 @@ function WalletSelect({
             ))
           ) : (
             <span className="block px-3 py-4 text-center text-xs text-faint">
-              Нет доступных кошельков
+              No wallets available
             </span>
           )}
         </div>
@@ -445,7 +422,7 @@ function AppSelect({
   disabled = false,
   onChange,
   options,
-  placeholder = 'Выбери значение',
+  placeholder = 'Select a value',
   value,
 }: {
   ariaLabel: string;
@@ -596,14 +573,14 @@ function WalletChecklist({
           >
             {allSelected ? <Check size={14} /> : null}
           </span>
-          {allSelected ? 'Снять выбор' : 'Выбрать все'}
+          {allSelected ? 'Clear selection' : 'Select all'}
         </button>
         <div className="flex items-center gap-2">
           <span className="rounded-full bg-soft px-2.5 py-1 text-[11px] font-semibold text-dim">
-            {selectedWallets.length} из {available.length}
+            {selectedWallets.length} of {available.length}
           </span>
           <span className="text-[11px] font-medium text-faint tabular-nums max-[520px]:hidden">
-            {formatSol(selectedBalance, true)} SOL выбрано
+            {formatSol(selectedBalance, true)} SOL selected
           </span>
         </div>
       </div>
@@ -611,9 +588,7 @@ function WalletChecklist({
         {available.length ? (
           available.map((wallet) => {
             const checked = selected.includes(wallet.id);
-            const walletName = /^[0-9]+$/.test(wallet.name)
-              ? `Кошелёк ${wallet.name}`
-              : wallet.name;
+            const walletName = /^[0-9]+$/.test(wallet.name) ? `Wallet ${wallet.name}` : wallet.name;
             return (
               <button
                 aria-pressed={checked}
@@ -652,7 +627,7 @@ function WalletChecklist({
           })
         ) : (
           <div className="flex min-h-28 items-center justify-center px-4 text-center text-xs text-faint">
-            Нет доступных кошельков
+            No wallets available
           </div>
         )}
       </div>
@@ -667,7 +642,7 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry?: () => vo
       <span className="flex-1">{message}</span>
       {onRetry ? (
         <Button compact tone="danger" onClick={onRetry}>
-          Повторить
+          Retry
         </Button>
       ) : null}
     </div>
@@ -723,7 +698,7 @@ function PreviewDialog({
             </span>
             <div>
               <h2 className="m-0 text-[17px] font-bold text-ink" id="preview-title">
-                Проверь перевод
+                Review transfer
               </h2>
               <p className="mt-1 mb-0 text-xs text-dim">
                 {preview.network} · {preview.rpc_host}
@@ -731,7 +706,7 @@ function PreviewDialog({
             </div>
           </div>
           <button
-            aria-label="Закрыть"
+            aria-label="Close"
             className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-ink disabled:cursor-not-allowed disabled:opacity-45"
             disabled={sending}
             type="button"
@@ -743,19 +718,19 @@ function PreviewDialog({
 
         <div className="grid grid-cols-3 gap-2.5 px-5 pt-[18px] max-[680px]:grid-cols-1">
           <div className="rounded-[10px] border border-line-soft bg-raised p-3">
-            <span className="block text-xs text-faint">Получатели</span>
+            <span className="block text-xs text-faint">Recipients</span>
             <strong className="mt-1 block text-sm font-bold text-ink">
               {preview.transfer_count}
             </strong>
           </div>
           <div className="rounded-[10px] border border-line-soft bg-raised p-3">
-            <span className="block text-xs text-faint">Сумма</span>
+            <span className="block text-xs text-faint">Amount</span>
             <strong className="mt-1 block text-sm font-bold text-ink">
               {formatSol(preview.total_amount)} SOL
             </strong>
           </div>
           <div className="rounded-[10px] border border-line-soft bg-raised p-3">
-            <span className="block text-xs text-faint">Комиссия ≈</span>
+            <span className="block text-xs text-faint">Est. fee</span>
             <strong className="mt-1 block text-sm font-bold text-ink">
               {formatSol(preview.estimated_fee)} SOL
             </strong>
@@ -788,7 +763,7 @@ function PreviewDialog({
             >
               <div className="min-w-0">
                 <span className="block text-[9px] font-semibold tracking-[0.06em] text-faint uppercase">
-                  Отправитель
+                  Sender
                 </span>
                 <strong className="mt-0.5 block truncate text-xs font-semibold text-copy">
                   {formatWalletLabel(transfer.sender_name)}
@@ -800,7 +775,7 @@ function PreviewDialog({
               <ArrowRight className="shrink-0 text-primary" size={16} />
               <div className="min-w-0">
                 <span className="block text-[9px] font-semibold tracking-[0.06em] text-faint uppercase">
-                  Получатель
+                  Recipient
                 </span>
                 <strong className="mt-0.5 block truncate text-xs font-semibold text-copy">
                   {formatWalletLabel(transfer.recipient_label)}
@@ -817,7 +792,7 @@ function PreviewDialog({
         </div>
 
         <div className="mx-5 mt-3.5 flex items-center justify-between gap-3 rounded-[9px] bg-primary/15 px-3.5 py-3">
-          <span className="text-xs text-dim">Итого спишется с комиссиями</span>
+          <span className="text-xs text-dim">Total debit including fees</span>
           <strong className="text-[13px] font-bold text-primary">
             ≈ {formatSol(preview.total_debit)} SOL
           </strong>
@@ -830,8 +805,8 @@ function PreviewDialog({
           <TriangleAlert size={18} />
           <span>
             {expired
-              ? 'Предпросмотр истёк. Вернись к форме и подготовь перевод ещё раз.'
-              : `Транзакции необратимы. На подтверждение осталось ${remainingSeconds} сек.`}
+              ? 'This preview has expired. Return to the form and prepare the transfer again.'
+              : `Transactions are irreversible. ${remainingSeconds}s left to confirm.`}
           </span>
         </div>
         {preview.requires_acknowledgement ? (
@@ -842,12 +817,12 @@ function PreviewDialog({
               type="checkbox"
               onChange={(event) => setAcknowledged(event.target.checked)}
             />
-            <span>Я сверил получателей, сеть и итоговую сумму операции.</span>
+            <span>I verified the recipients, network, and total amount.</span>
           </label>
         ) : null}
         <div className="mt-[18px] flex justify-end gap-2 border-t border-line-soft px-5 py-[15px]">
           <Button disabled={sending} onClick={onClose}>
-            Вернуться
+            Back
           </Button>
           <Button
             disabled={sending || !acknowledged || expired}
@@ -856,7 +831,7 @@ function PreviewDialog({
             variant="solid"
             onClick={onConfirm}
           >
-            {sending ? 'Отправляем…' : expired ? 'Предпросмотр истёк' : 'Подтвердить и отправить'}
+            {sending ? 'Sending…' : expired ? 'Preview expired' : 'Confirm and send'}
           </Button>
         </div>
       </section>
@@ -865,10 +840,10 @@ function PreviewDialog({
 }
 
 function transactionStatusLabel(status: TransactionStatus) {
-  if (status === 'submitted') return 'Отправлено в сеть';
-  if (status === 'confirmed') return 'Подтверждено';
-  if (status === 'finalized') return 'Финализировано';
-  return 'Ошибка';
+  if (status === 'submitted') return 'Submitted';
+  if (status === 'confirmed') return 'Confirmed';
+  if (status === 'finalized') return 'Finalized';
+  return 'Failed';
 }
 
 function SendResultDialog({
@@ -906,13 +881,15 @@ function SendResultDialog({
             </span>
             <div>
               <h2 className="m-0 text-[17px] font-bold text-ink" id="send-result-title">
-                {result.ok ? 'Операция отправлена' : 'Операция выполнена частично'}
+                {result.ok ? 'Operation submitted' : 'Operation partially completed'}
               </h2>
-              <p className="mt-1 mb-0 text-xs text-dim">Статусы продолжат обновляться в журнале</p>
+              <p className="mt-1 mb-0 text-xs text-dim">
+                Statuses will continue updating in Activity
+              </p>
             </div>
           </div>
           <button
-            aria-label="Закрыть результат"
+            aria-label="Close result"
             className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-ink"
             type="button"
             onClick={onClose}
@@ -923,11 +900,11 @@ function SendResultDialog({
 
         <div className="grid grid-cols-3 gap-2.5 px-5 pt-[18px] max-[680px]:grid-cols-1">
           <div className="rounded-[10px] border border-line-soft bg-raised p-3">
-            <span className="block text-xs text-faint">Запланировано</span>
+            <span className="block text-xs text-faint">Planned</span>
             <strong className="mt-1 block text-sm font-bold text-ink">{result.planned}</strong>
           </div>
           <div className="rounded-[10px] border border-primary/20 bg-primary/10 p-3">
-            <span className="block text-xs text-dim">Отправлено</span>
+            <span className="block text-xs text-dim">Submitted</span>
             <strong className="mt-1 block text-sm font-bold text-primary">
               {result.submitted}
             </strong>
@@ -937,7 +914,7 @@ function SendResultDialog({
               result.failed ? 'border-danger/20 bg-danger/10' : 'border-line-soft bg-raised'
             }`}
           >
-            <span className="block text-xs text-faint">Ошибки</span>
+            <span className="block text-xs text-faint">Failed</span>
             <strong
               className={`mt-1 block text-sm font-bold ${
                 result.failed ? 'text-danger' : 'text-ink'
@@ -988,19 +965,19 @@ function SendResultDialog({
         {result.retry_preview ? (
           <div className="mx-5 mt-3 flex items-start gap-2.5 rounded-[9px] border border-warning/25 bg-warning/10 px-3 py-2.5 text-xs leading-relaxed text-warning">
             <TriangleAlert className="mt-0.5 shrink-0" size={17} />
-            <span>Неудачные переводы можно заново проверить и отправить отдельно.</span>
+            <span>Failed transfers can be reviewed and submitted separately.</span>
           </div>
         ) : null}
 
         <div className="mt-[18px] flex flex-wrap justify-end gap-2 border-t border-line-soft px-5 py-[15px]">
           {result.retry_preview ? (
             <Button icon={RotateCcw} tone="primary" onClick={() => onRetry(result.retry_preview!)}>
-              Повторить неудачные
+              Retry failed
             </Button>
           ) : null}
-          <Button onClick={onActivity}>Открыть журнал</Button>
+          <Button onClick={onActivity}>Open activity</Button>
           <Button tone="primary" variant="solid" onClick={onClose}>
-            Готово
+            Done
           </Button>
         </div>
       </section>
@@ -1012,19 +989,46 @@ function OverviewPage({
   state,
   onRetry,
   onNavigate,
-  onCopy,
   onOpenOperation,
 }: {
   state: WalletState;
   onRetry: () => void;
   onNavigate: (page: PageId) => void;
-  onCopy: (value: string, message: string) => void;
   onOpenOperation: (mode: OperationMode) => void;
 }) {
   const topWallets = [...state.wallets].sort((a, b) => b.balance - a.balance).slice(0, 5);
+  const [activity, setActivity] = useState<ActivityEntry[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void api
+      .activity()
+      .then((entries) => {
+        if (!cancelled) setActivity(entries);
+      })
+      .catch(() => {
+        // The overview stays useful if the optional activity feed is unavailable.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+  const transferAmount = (entry: ActivityEntry) => {
+    const match = entry.message.match(/([0-9]+(?:\.[0-9]+)?)\s*SOL/i);
+    return match ? Number(match[1]) : 0;
+  };
+  const movement24h = activity
+    .filter((entry) => {
+      const timestamp = new Date(entry.timestamp).getTime();
+      return Number.isFinite(timestamp) && timestamp >= dayAgo && Boolean(entry.status);
+    })
+    .reduce((total, entry) => total + transferAmount(entry), 0);
+
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Обзор" />
+      <PageHeader title="Overview" description="Solana operations at a glance" />
       {state.rpc_error ? <ErrorBanner message={state.rpc_error} onRetry={onRetry} /> : null}
       {state.pending_transaction_count ? (
         <button
@@ -1034,79 +1038,51 @@ function OverviewPage({
         >
           <LoaderCircle className="shrink-0 animate-spin text-primary" size={18} />
           <span className="flex-1">
-            В обработке транзакций: <b>{state.pending_transaction_count}</b>. Статусы обновляются
-            автоматически.
+            Transactions in progress: <b>{state.pending_transaction_count}</b>. Statuses update
+            automatically.
           </span>
           <ChevronRight className="shrink-0 text-primary" size={17} />
         </button>
       ) : null}
       <div className="grid grid-cols-[minmax(0,1.55fr)_minmax(300px,0.75fr)] gap-4 max-[1180px]:grid-cols-1">
-        <div className="col-start-1 row-start-1 grid grid-cols-3 gap-3.5 max-[680px]:grid-cols-1">
+        <div className="col-start-1 row-start-1 grid grid-cols-2 gap-4 max-[680px]:grid-cols-1">
           <MetricCard
             icon={CircleDollarSign}
-            label="Портфель"
+            label="Portfolio value"
             value={`${formatSol(state.total_balance, true)} SOL`}
+            detail="USD quote is not connected"
           />
-          <MetricCard icon={WalletCards} label="Кошельки" value={String(state.wallet_count)} />
           <MetricCard
-            icon={Gauge}
-            label="Отклик RPC"
-            value={state.rpc_latency_ms === null ? '—' : `${state.rpc_latency_ms} мс`}
+            icon={Activity}
+            label="24h movement"
+            value={movement24h ? `${formatSol(movement24h, true)} SOL` : 'No transfers'}
+            detail={movement24h ? 'Submitted from this wallet set' : 'No local activity in the last 24h'}
           />
         </div>
 
         <Panel
           className="col-start-1 row-start-2 max-[1180px]:row-start-3"
-          title="Распределение портфеля"
-          subtitle="Топ-5 кошельков по балансу"
+          title="Portfolio distribution"
+          subtitle="Top five wallets by balance"
           actions={
             <Button compact onClick={() => onNavigate('wallets')}>
-              Все кошельки <ChevronRight size={16} />
+              All wallets <ChevronRight size={16} />
             </Button>
           }
         >
           {topWallets.length ? (
             <div className="flex flex-col">
-              {topWallets.map((wallet, index) => {
+              {topWallets.map((wallet) => {
                 const portfolioShare =
                   state.total_balance > 0 ? (wallet.balance / state.total_balance) * 100 : 0;
                 return (
                   <div
-                    className="grid min-h-12 cursor-pointer grid-cols-[minmax(190px,0.9fr)_minmax(300px,1.5fr)] items-center gap-3 border-t border-line-soft px-1 transition first:border-t-0 hover:bg-muted/35 focus-visible:bg-muted/35 focus-visible:outline-2 focus-visible:outline-primary/50 max-[680px]:grid-cols-1 max-[680px]:gap-y-1.5 max-[680px]:py-2"
+                    className="grid min-h-12 grid-cols-[minmax(150px,0.65fr)_minmax(300px,1.5fr)] items-center gap-3 border-t border-line-soft px-1 first:border-t-0 max-[680px]:grid-cols-1 max-[680px]:gap-y-1.5 max-[680px]:py-2"
                     key={wallet.id}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => onNavigate('wallets')}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') onNavigate('wallets');
-                    }}
                   >
-                    <div className="flex min-w-0 items-center gap-3">
-                      <span className="w-6 shrink-0 font-mono text-xs font-semibold text-faint tabular-nums">
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
-                      <div className="min-w-0">
-                        <strong className="block overflow-hidden text-[13px] font-semibold text-ellipsis whitespace-nowrap text-copy">
-                          {/^[0-9]+$/.test(wallet.name) ? `Кошелёк ${wallet.name}` : wallet.name}
-                        </strong>
-                        <div className="mt-0.5 flex min-w-0 items-center gap-1">
-                          <small className="block overflow-hidden font-mono text-xs text-ellipsis whitespace-nowrap text-faint">
-                            {wallet.short_address}
-                          </small>
-                          <button
-                            aria-label="Копировать адрес"
-                            className="inline-flex shrink-0 cursor-pointer items-center border-0 bg-transparent p-1 text-faint transition hover:text-primary"
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              onCopy(wallet.pubkey, 'Адрес скопирован');
-                            }}
-                          >
-                            <Copy size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                    <strong className="block min-w-0 overflow-hidden text-[13px] font-semibold text-ellipsis whitespace-nowrap text-copy">
+                      {/^[0-9]+$/.test(wallet.name) ? `Wallet ${wallet.name}` : wallet.name}
+                    </strong>
                     <div className="flex min-w-0 items-center gap-2.5">
                       <span className="w-12 shrink-0 text-right text-xs font-semibold text-dim tabular-nums">
                         {portfolioPercentFormatter.format(portfolioShare)}%
@@ -1130,54 +1106,59 @@ function OverviewPage({
             <EmptyState
               action={
                 <Button icon={FileUp} tone="primary" onClick={() => onNavigate('settings')}>
-                  Добавить CSV
+                  Add CSV
                 </Button>
               }
               icon={WalletCards}
-              text="Импортируй CSV с колонками name, pubkey и privkey."
-              title="Кошельков пока нет"
+              text="Import a CSV with name, pubkey, and privkey columns."
+              title="No wallets yet"
             />
           )}
         </Panel>
 
-        <div className="col-start-2 row-span-2 row-start-1 flex flex-col gap-4 self-start max-[1180px]:col-start-1 max-[1180px]:row-start-2">
+        <div className="col-start-2 row-span-2 row-start-1 flex flex-col gap-4 self-start max-[1180px]:col-start-1 max-[1180px]:row-span-1 max-[1180px]:row-start-2">
           <div
-            className={`flex min-h-[72px] w-full items-center gap-3 rounded-[13px] border bg-surface p-4 ${state.rpc_error ? 'border-danger/25' : 'border-line-soft'}`}
+            className={`flex min-h-[72px] w-full items-center gap-3 rounded-[4px] border bg-surface p-4 ${state.rpc_error ? 'border-danger/25' : 'border-line'}`}
           >
             <span
-              className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] ${state.rpc_error ? 'bg-danger/10 text-danger' : 'bg-primary/15 text-primary'}`}
+              className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[3px] ${state.rpc_error ? 'bg-danger/10 text-danger' : 'bg-solana/10 text-solana'}`}
             >
               <Network size={20} />
             </span>
             <div className="min-w-0 flex-1">
               <strong className="block text-[15px] font-bold text-copy">{state.network}</strong>
               <small className="mt-1 block overflow-hidden text-[13px] text-ellipsis whitespace-nowrap text-faint">
-                {state.rpc_error ? 'RPC недоступен' : state.rpc_host}
+                {state.rpc_error ? 'RPC unavailable' : state.rpc_host}
               </small>
             </div>
             <div className="flex shrink-0 items-center gap-3">
+              {!state.rpc_error && state.rpc_latency_ms !== null ? (
+                <span className="text-xs whitespace-nowrap text-faint tabular-nums">
+                  {state.rpc_latency_ms} ms
+                </span>
+              ) : null}
               <span
                 aria-label={
                   state.rpc_error
-                    ? 'Сеть недоступна'
+                    ? 'Network unavailable'
                     : state.rpc_latency_ms === null
-                      ? 'Проверяем состояние сети'
-                      : 'Сеть доступна'
+                      ? 'Checking network'
+                      : 'Network online'
                 }
-                className={`h-2.5 w-2.5 rounded-full ${state.rpc_error ? 'bg-danger shadow-[0_0_0_5px_rgba(255,127,111,0.12)]' : state.rpc_latency_ms === null ? 'bg-warning shadow-[0_0_0_5px_rgba(240,191,99,0.12)]' : 'bg-emerald-400 shadow-[0_0_0_5px_rgba(52,211,153,0.12)]'}`}
+                className={`h-2.5 w-2.5 rounded-full ${state.rpc_error ? 'bg-danger shadow-[0_0_0_5px_rgba(185,75,58,0.12)]' : state.rpc_latency_ms === null ? 'bg-warning shadow-[0_0_0_5px_rgba(184,120,36,0.12)]' : 'bg-solana shadow-[0_0_0_5px_rgba(139,92,246,0.12)]'}`}
                 role="status"
                 title={
                   state.rpc_error
-                    ? 'Сеть недоступна'
+                    ? 'Network unavailable'
                     : state.rpc_latency_ms === null
-                      ? 'Проверяем состояние сети'
-                      : 'Сеть доступна'
+                      ? 'Checking network'
+                      : 'Network online'
                 }
               />
               <button
-                aria-label="Изменить сеть"
+                aria-label="Change network"
                 className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border border-line bg-raised text-faint transition hover:border-line-strong hover:bg-muted hover:text-primary"
-                title="Изменить сеть"
+                title="Change network"
                 type="button"
                 onClick={() => onNavigate('settings')}
               >
@@ -1186,7 +1167,7 @@ function OverviewPage({
             </div>
           </div>
 
-          <Panel title="Быстрые действия">
+          <Panel title="Quick actions">
             <div className="flex flex-col gap-2">
               <button
                 className="flex min-h-[58px] w-full cursor-pointer items-center gap-3 rounded-[10px] border border-line-soft bg-raised p-2.5 text-left transition hover:-translate-y-px hover:border-line-strong hover:bg-muted"
@@ -1197,10 +1178,8 @@ function OverviewPage({
                   <Send size={21} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <strong className="block text-[13px] font-semibold text-copy">
-                    Перевести SOL
-                  </strong>
-                  <small className="mt-0.5 block text-xs text-faint">Один получатель</small>
+                  <strong className="block text-[13px] font-semibold text-copy">Send SOL</strong>
+                  <small className="mt-0.5 block text-xs text-faint">Single recipient</small>
                 </div>
                 <ChevronRight className="text-faint" size={18} />
               </button>
@@ -1214,28 +1193,10 @@ function OverviewPage({
                 </span>
                 <div className="min-w-0 flex-1">
                   <strong className="block text-[13px] font-semibold text-copy">
-                    Массовые операции
+                    Batch operations
                   </strong>
                   <small className="mt-0.5 block text-xs text-faint">
-                    Раздать, собрать, выровнять
-                  </small>
-                </div>
-                <ChevronRight className="text-faint" size={18} />
-              </button>
-              <button
-                className="flex min-h-[58px] w-full cursor-pointer items-center gap-3 rounded-[10px] border border-line-soft bg-raised p-2.5 text-left transition hover:-translate-y-px hover:border-line-strong hover:bg-muted"
-                type="button"
-                onClick={() => onNavigate('settings')}
-              >
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] bg-primary/15 text-primary">
-                  <Network size={21} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <strong className="block text-[13px] font-semibold text-copy">
-                    Настроить RPC
-                  </strong>
-                  <small className="mt-0.5 block overflow-hidden text-xs text-ellipsis whitespace-nowrap text-faint">
-                    {state.rpc_host}
+                    Distribute, collect, equalize
                   </small>
                 </div>
                 <ChevronRight className="text-faint" size={18} />
@@ -1263,11 +1224,11 @@ function WalletsPage({
   onToast: (message: string, tone?: 'success' | 'error') => void;
   onTransfer: (walletId: string) => void;
 }) {
-  type SortKey = 'number' | 'name' | 'pubkey' | 'balance';
+  type SortKey = 'name' | 'balance';
 
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<{ key: SortKey; direction: 'asc' | 'desc' }>({
-    key: 'number',
+    key: 'name',
     direction: 'asc',
   });
   const [addingWallet, setAddingWallet] = useState(false);
@@ -1286,14 +1247,12 @@ function WalletsPage({
     .sort((left, right) => {
       let comparison = 0;
 
-      if (sort.key === 'number') comparison = left.index - right.index;
       if (sort.key === 'name') {
-        comparison = left.wallet.name.localeCompare(right.wallet.name, 'ru', {
+        comparison = left.wallet.name.localeCompare(right.wallet.name, 'en', {
           numeric: true,
           sensitivity: 'base',
         });
       }
-      if (sort.key === 'pubkey') comparison = left.wallet.pubkey.localeCompare(right.wallet.pubkey);
       if (sort.key === 'balance') comparison = left.wallet.balance - right.wallet.balance;
 
       return (sort.direction === 'asc' ? comparison : -comparison) || left.index - right.index;
@@ -1310,7 +1269,7 @@ function WalletsPage({
 
     return (
       <button
-        aria-label={`Сортировать по полю «${label}»`}
+        aria-label={`Sort by ${label}`}
         className={`font-inherit tracking-inherit flex w-fit cursor-pointer items-center gap-1 border-0 bg-transparent p-0 text-left uppercase transition hover:text-copy ${isActive ? 'text-copy' : 'text-faint'}`}
         type="button"
         onClick={() => toggleSort(key)}
@@ -1346,7 +1305,7 @@ function WalletsPage({
       setAddName('');
       setAddPrivateKey('');
       await onReload();
-      onToast('Кошелёк добавлен');
+      onToast('Wallet added');
     } catch (reason) {
       onToast(reason instanceof Error ? reason.message : String(reason), 'error');
     } finally {
@@ -1361,7 +1320,7 @@ function WalletsPage({
       await api.updateWallet(editingWallet.id, editName.trim());
       setEditingWallet(null);
       await onReload();
-      onToast('Название кошелька изменено');
+      onToast('Wallet name updated');
     } catch (reason) {
       onToast(reason instanceof Error ? reason.message : String(reason), 'error');
     } finally {
@@ -1375,7 +1334,7 @@ function WalletsPage({
       await api.deleteWallet(deletingWallet.id);
       setDeletingWallet(null);
       await onReload();
-      onToast('Кошелёк удалён');
+      onToast('Wallet deleted');
     } catch (reason) {
       onToast(reason instanceof Error ? reason.message : String(reason), 'error');
     } finally {
@@ -1385,7 +1344,7 @@ function WalletsPage({
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Кошельки" />
+      <PageHeader title="Wallets" description="Local accounts and balances" />
       <Panel className="p-0">
         <div className="flex items-center justify-between gap-4 p-[18px] max-[680px]:flex-col max-[680px]:items-stretch">
           <label className="relative block w-full max-w-[280px] max-[680px]:max-w-none">
@@ -1395,7 +1354,7 @@ function WalletsPage({
             />
             <input
               className="h-10 w-full rounded-[9px] border border-line bg-raised py-2.5 pr-3.5 pl-10 text-[13px] text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15"
-              placeholder="Поиск по имени или адресу"
+              placeholder="Search by name or address"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
             />
@@ -1409,105 +1368,98 @@ function WalletsPage({
               variant="solid"
               onClick={() => setAddingWallet(true)}
             >
-              Добавить
+              Add
             </Button>
             <Button className="h-10" icon={Upload} onClick={() => inputRef.current?.click()}>
-              Импорт CSV
+              Import CSV
             </Button>
           </div>
         </div>
         {filtered.length ? (
-          <div className="relative mx-[18px] mb-[18px] rounded-[11px] border border-line-soft">
-            <div className="grid h-10 grid-cols-[52px_minmax(140px,0.45fr)_minmax(420px,2fr)_190px_132px] items-center gap-4 rounded-t-[10px] bg-muted/65 px-5 text-xs font-semibold tracking-[0.06em] text-faint uppercase max-[1180px]:grid-cols-[44px_minmax(120px,0.45fr)_minmax(300px,1.55fr)_150px_40px] max-[680px]:hidden">
-              {sortHeader('number', '№')}
-              {sortHeader('name', 'Название')}
-              {sortHeader('pubkey', 'Публичный адрес')}
-              {sortHeader('balance', 'Баланс')}
-              <span className="max-[1180px]:sr-only">Действие</span>
+          <div className="relative mx-[18px] mb-[18px] overflow-hidden rounded-[10px]">
+            <div className="grid h-10 grid-cols-[minmax(160px,0.55fr)_minmax(220px,1.4fr)_190px_52px] items-center gap-4 bg-muted/65 px-5 text-xs font-semibold tracking-[0.06em] text-faint uppercase max-[1180px]:grid-cols-[minmax(140px,0.55fr)_minmax(180px,1fr)_150px_40px] max-[680px]:hidden">
+              {sortHeader('name', 'Name')}
+              <span>Public address</span>
+              {sortHeader('balance', 'Balance')}
+              <span className="max-[1180px]:sr-only">Action</span>
             </div>
-            {filtered.map((wallet) => {
-              const walletNumber = state.wallets.findIndex((item) => item.id === wallet.id) + 1;
-              return (
-                <div
-                  className="relative grid min-h-[72px] grid-cols-[52px_minmax(140px,0.45fr)_minmax(420px,2fr)_190px_132px] items-center gap-4 border-t border-line-soft px-5 transition hover:z-20 hover:bg-muted/40 max-[1180px]:grid-cols-[44px_minmax(120px,0.45fr)_minmax(300px,1.55fr)_150px_40px] max-[680px]:grid-cols-[36px_minmax(0,1fr)_auto] max-[680px]:gap-2 max-[680px]:py-3"
-                  key={wallet.id}
+            {filtered.map((wallet) => (
+              <div
+                className="relative grid min-h-[72px] grid-cols-[minmax(160px,0.55fr)_minmax(220px,1.4fr)_190px_52px] items-center gap-4 border-t border-line-soft px-5 transition hover:z-20 hover:bg-muted/40 max-[1180px]:grid-cols-[minmax(140px,0.55fr)_minmax(180px,1fr)_150px_40px] max-[680px]:grid-cols-[minmax(0,1fr)_auto] max-[680px]:gap-2 max-[680px]:py-3"
+                key={wallet.id}
+              >
+                <div className="min-w-0">
+                  <strong className="block overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap text-copy">
+                    {/^[0-9]+$/.test(wallet.name) ? `Wallet ${wallet.name}` : wallet.name}
+                  </strong>
+                </div>
+                <button
+                  className="flex min-w-0 cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-left text-copy hover:text-primary max-[680px]:col-span-full max-[680px]:row-start-2"
+                  title={wallet.pubkey}
+                  type="button"
+                  onClick={() => onCopy(wallet.pubkey, 'Address copied')}
                 >
-                  <span className="text-sm font-semibold text-faint tabular-nums">
-                    {String(walletNumber).padStart(2, '0')}
-                  </span>
-                  <div className="min-w-0">
-                    <strong className="block overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap text-copy">
-                      {/^[0-9]+$/.test(wallet.name) ? `Кошелёк ${wallet.name}` : wallet.name}
-                    </strong>
-                  </div>
+                  <code className="overflow-hidden font-mono text-[15px] font-medium text-ellipsis whitespace-nowrap">
+                    {wallet.short_address}
+                  </code>
+                  <Copy className="shrink-0 text-faint" size={16} />
+                </button>
+                <div className="flex items-baseline justify-start gap-1.5 tabular-nums max-[680px]:col-start-2 max-[680px]:row-start-1">
+                  <strong className="text-sm font-bold text-ink">
+                    {formatSol(wallet.balance)}
+                  </strong>
+                  <small className="text-xs text-faint">SOL</small>
+                </div>
+                <div className="group/actions relative justify-self-start max-[680px]:hidden">
                   <button
-                    className="flex min-w-0 cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-left text-copy hover:text-primary max-[680px]:col-span-full max-[680px]:row-start-2"
-                    title={wallet.pubkey}
+                    aria-label={`Actions for ${wallet.name}`}
+                    className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border border-transparent bg-transparent text-faint transition hover:border-line hover:bg-muted hover:text-ink focus:border-line focus:bg-muted focus:text-ink"
                     type="button"
-                    onClick={() => onCopy(wallet.pubkey, 'Адрес скопирован')}
                   >
-                    <code className="overflow-hidden font-mono text-[15px] font-medium text-ellipsis whitespace-nowrap">
-                      {wallet.pubkey}
-                    </code>
-                    <Copy className="shrink-0 text-faint" size={16} />
+                    <EllipsisVertical size={19} />
                   </button>
-                  <div className="flex items-baseline justify-start gap-1.5 tabular-nums max-[680px]:col-start-3 max-[680px]:row-start-1">
-                    <strong className="text-sm font-bold text-ink">
-                      {formatSol(wallet.balance)}
-                    </strong>
-                    <small className="text-xs text-faint">SOL</small>
-                  </div>
-                  <div className="group/actions relative justify-self-start max-[680px]:hidden">
+                  <div className="pointer-events-none invisible absolute top-0 right-full z-40 mr-2 w-[160px] rounded-[10px] border border-line bg-raised p-1.5 opacity-0 shadow-[0_16px_42px_rgba(0,0,0,0.38)] transition group-focus-within/actions:pointer-events-auto group-focus-within/actions:visible group-focus-within/actions:opacity-100 group-hover/actions:pointer-events-auto group-hover/actions:visible group-hover/actions:opacity-100">
                     <button
-                      aria-label={`Действия с кошельком ${wallet.name}`}
-                      className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border border-transparent bg-transparent text-faint transition hover:border-line hover:bg-muted hover:text-ink focus:border-line focus:bg-muted focus:text-ink"
+                      className="flex min-h-9 w-full cursor-pointer items-center gap-2.5 rounded-[7px] border-0 bg-transparent px-2.5 text-left text-[13px] font-medium text-copy transition hover:bg-muted"
                       type="button"
+                      onClick={() => onTransfer(wallet.id)}
                     >
-                      <EllipsisVertical size={19} />
+                      <ArrowUpRight className="text-faint" size={16} />
+                      Send
                     </button>
-                    <div className="pointer-events-none invisible absolute top-0 right-full z-40 mr-2 w-[160px] rounded-[10px] border border-line bg-raised p-1.5 opacity-0 shadow-[0_16px_42px_rgba(0,0,0,0.38)] transition group-focus-within/actions:pointer-events-auto group-focus-within/actions:visible group-focus-within/actions:opacity-100 group-hover/actions:pointer-events-auto group-hover/actions:visible group-hover/actions:opacity-100">
-                      <button
-                        className="flex min-h-9 w-full cursor-pointer items-center gap-2.5 rounded-[7px] border-0 bg-transparent px-2.5 text-left text-[13px] font-medium text-copy transition hover:bg-muted"
-                        type="button"
-                        onClick={() => onTransfer(wallet.id)}
-                      >
-                        <ArrowUpRight className="text-faint" size={16} />
-                        Перевести
-                      </button>
-                      <button
-                        className="flex min-h-9 w-full cursor-pointer items-center gap-2.5 rounded-[7px] border-0 bg-transparent px-2.5 text-left text-[13px] font-medium text-copy transition hover:bg-muted"
-                        type="button"
-                        onClick={() => {
-                          setEditingWallet(wallet);
-                          setEditName(wallet.name);
-                        }}
-                      >
-                        <Pencil className="text-faint" size={16} />
-                        Изменить
-                      </button>
-                      <button
-                        className="flex min-h-9 w-full cursor-pointer items-center gap-2.5 rounded-[7px] border-0 bg-transparent px-2.5 text-left text-[13px] font-medium text-danger transition hover:bg-danger/10"
-                        type="button"
-                        onClick={() => setDeletingWallet(wallet)}
-                      >
-                        <Trash2 size={16} />
-                        Удалить
-                      </button>
-                    </div>
+                    <button
+                      className="flex min-h-9 w-full cursor-pointer items-center gap-2.5 rounded-[7px] border-0 bg-transparent px-2.5 text-left text-[13px] font-medium text-copy transition hover:bg-muted"
+                      type="button"
+                      onClick={() => {
+                        setEditingWallet(wallet);
+                        setEditName(wallet.name);
+                      }}
+                    >
+                      <Pencil className="text-faint" size={16} />
+                      Rename
+                    </button>
+                    <button
+                      className="flex min-h-9 w-full cursor-pointer items-center gap-2.5 rounded-[7px] border-0 bg-transparent px-2.5 text-left text-[13px] font-medium text-danger transition hover:bg-danger/10"
+                      type="button"
+                      onClick={() => setDeletingWallet(wallet)}
+                    >
+                      <Trash2 size={16} />
+                      Delete
+                    </button>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         ) : (
           <EmptyState
             icon={Search}
             text={
               state.wallets.length
-                ? 'Попробуй изменить поисковый запрос.'
-                : 'Импортируй CSV, чтобы начать работу.'
+                ? 'Try a different search query.'
+                : 'Import a CSV to get started.'
             }
-            title={state.wallets.length ? 'Ничего не найдено' : 'Список пуст'}
+            title={state.wallets.length ? 'Nothing found' : 'No wallets'}
           />
         )}
       </Panel>
@@ -1528,14 +1480,14 @@ function WalletsPage({
             <div className="flex items-start justify-between gap-4 border-b border-line-soft px-5 py-[18px]">
               <div>
                 <h2 className="m-0 text-[17px] font-bold text-ink" id="add-wallet-title">
-                  Добавить кошелёк
+                  Add wallet
                 </h2>
                 <p className="mt-1.5 mb-0 text-xs text-dim">
-                  Публичный адрес будет вычислен автоматически
+                  The public address will be derived automatically
                 </p>
               </div>
               <button
-                aria-label="Закрыть"
+                aria-label="Close"
                 className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-ink"
                 disabled={actionPending}
                 type="button"
@@ -1553,14 +1505,14 @@ function WalletsPage({
                   className="mb-2 block text-[13px] font-semibold text-copy"
                   htmlFor="new-wallet-name"
                 >
-                  Название
+                  Name
                 </label>
                 <input
                   autoFocus
                   className="min-h-12 w-full rounded-[9px] border border-line bg-raised px-3.5 text-sm text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15"
                   id="new-wallet-name"
                   maxLength={80}
-                  placeholder="Например, Основной"
+                  placeholder="For example, Primary"
                   value={addName}
                   onChange={(event) => setAddName(event.target.value)}
                 />
@@ -1570,13 +1522,13 @@ function WalletsPage({
                   className="mb-2 block text-[13px] font-semibold text-copy"
                   htmlFor="new-wallet-key"
                 >
-                  Приватный ключ
+                  Private key
                 </label>
                 <input
                   autoComplete="new-password"
                   className="min-h-12 w-full rounded-[9px] border border-line bg-raised px-3.5 font-mono text-[13px] text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15"
                   id="new-wallet-key"
-                  placeholder="Base58 или JSON-массив"
+                  placeholder="Base58 or JSON array"
                   spellCheck={false}
                   type="password"
                   value={addPrivateKey}
@@ -1585,7 +1537,7 @@ function WalletsPage({
               </div>
               <div className="mt-1 flex justify-end gap-2 border-t border-line-soft pt-4">
                 <Button disabled={actionPending} type="button" onClick={closeAddWallet}>
-                  Отмена
+                  Cancel
                 </Button>
                 <Button
                   disabled={actionPending || !addName.trim() || !addPrivateKey.trim()}
@@ -1594,7 +1546,7 @@ function WalletsPage({
                   type="submit"
                   variant="solid"
                 >
-                  {actionPending ? 'Добавляем…' : 'Добавить'}
+                  {actionPending ? 'Adding…' : 'Add'}
                 </Button>
               </div>
             </form>
@@ -1618,12 +1570,14 @@ function WalletsPage({
             <div className="flex items-start justify-between gap-4 border-b border-line-soft px-5 py-[18px]">
               <div>
                 <h2 className="m-0 text-[17px] font-bold text-ink" id="edit-wallet-title">
-                  Изменить кошелёк
+                  Rename wallet
                 </h2>
-                <p className="mt-1.5 mb-0 text-xs text-dim">Публичный адрес останется прежним</p>
+                <p className="mt-1.5 mb-0 text-xs text-dim">
+                  The public address will stay unchanged
+                </p>
               </div>
               <button
-                aria-label="Закрыть"
+                aria-label="Close"
                 className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-ink"
                 disabled={actionPending}
                 type="button"
@@ -1637,7 +1591,7 @@ function WalletsPage({
                 className="mb-2 block text-[13px] font-semibold text-copy"
                 htmlFor="wallet-name"
               >
-                Название
+                Name
               </label>
               <input
                 autoFocus
@@ -1656,7 +1610,7 @@ function WalletsPage({
                   type="button"
                   onClick={() => setEditingWallet(null)}
                 >
-                  Отмена
+                  Cancel
                 </Button>
                 <Button
                   disabled={actionPending || !editName.trim()}
@@ -1665,7 +1619,7 @@ function WalletsPage({
                   type="submit"
                   variant="solid"
                 >
-                  {actionPending ? 'Сохраняем…' : 'Сохранить'}
+                  {actionPending ? 'Saving…' : 'Save'}
                 </Button>
               </div>
             </form>
@@ -1690,15 +1644,15 @@ function WalletsPage({
               <Trash2 size={21} />
             </span>
             <h2 className="mt-4 mb-0 text-[17px] font-bold text-ink" id="delete-wallet-title">
-              Удалить {deletingWallet.name}?
+              Delete {deletingWallet.name}?
             </h2>
             <p className="mt-2 mb-0 text-[13px] leading-5 text-dim">
-              Запись будет удалена из файла {state.wallet_file}. Отменить это действие из приложения
-              не получится.
+              This entry will be removed from {state.wallet_file}. This action cannot be undone in
+              the app.
             </p>
             <div className="mt-5 flex justify-end gap-2 border-t border-line-soft pt-4">
               <Button disabled={actionPending} onClick={() => setDeletingWallet(null)}>
-                Отмена
+                Cancel
               </Button>
               <Button
                 disabled={actionPending}
@@ -1707,7 +1661,7 @@ function WalletsPage({
                 variant="solid"
                 onClick={() => void deleteWallet()}
               >
-                {actionPending ? 'Удаляем…' : 'Удалить'}
+                {actionPending ? 'Deleting…' : 'Delete'}
               </Button>
             </div>
           </section>
@@ -1750,13 +1704,13 @@ function SingleTransferForm({
   const amountInvalid = !amount || !Number.isFinite(amountNumber) || amountNumber <= 0;
   const amountExceedsBalance = !amountInvalid && amountNumber > spendableBalance;
   const formHint = !sourceId
-    ? 'Выбери отправителя'
+    ? 'Select a sender'
     : recipientMissing
-      ? 'Выбери получателя'
+      ? 'Select a recipient'
       : amountInvalid
-        ? 'Укажи сумму'
+        ? 'Enter an amount'
         : amountExceedsBalance
-          ? 'Сумма превышает доступный баланс с учётом комиссии'
+          ? 'The amount exceeds the available balance including fees'
           : '';
   useEffect(() => {
     if (!sourceId && state.wallets[0]) setSourceId(state.wallets[0].id);
@@ -1790,8 +1744,8 @@ function SingleTransferForm({
     return (
       <EmptyState
         icon={WalletCards}
-        text="Добавь CSV-файл в настройках, прежде чем отправлять SOL."
-        title="Нет кошельков для отправки"
+        text="Add a CSV file in Settings before sending SOL."
+        title="No wallets available"
       />
     );
   }
@@ -1800,12 +1754,12 @@ function SingleTransferForm({
     <div className="w-full">
       <Panel
         className="p-5"
-        title="Новый перевод"
-        subtitle="Заполни детали — отправка произойдёт только после подтверждения"
+        title="New transfer"
+        subtitle="Set the details — funds move only after confirmation"
       >
         <form className="flex flex-col gap-3.5" onSubmit={submit}>
           <div className="flex flex-col gap-2.5">
-            <TransferFieldLabel label="Откуда" />
+            <TransferFieldLabel label="From" />
             <WalletSelect
               detailed
               wallets={state.wallets}
@@ -1821,7 +1775,7 @@ function SingleTransferForm({
 
           <div className="flex flex-col gap-2.5">
             <div className="flex items-center justify-between gap-3 max-[520px]:flex-col max-[520px]:items-stretch">
-              <TransferFieldLabel label="Куда" />
+              <TransferFieldLabel label="To" />
               <div className="inline-flex shrink-0 rounded-[9px] border border-line bg-raised p-0.5 max-[520px]:w-full">
                 <button
                   aria-pressed={recipientType === 'wallet'}
@@ -1830,7 +1784,7 @@ function SingleTransferForm({
                   onClick={() => setRecipientType('wallet')}
                 >
                   <WalletCards size={14} />
-                  Мой кошелёк
+                  My wallet
                 </button>
                 <button
                   aria-pressed={recipientType === 'address'}
@@ -1839,7 +1793,7 @@ function SingleTransferForm({
                   onClick={() => setRecipientType('address')}
                 >
                   <AtSign size={14} />
-                  По адресу
+                  External address
                 </button>
               </div>
             </div>
@@ -1847,7 +1801,7 @@ function SingleTransferForm({
               <WalletSelect
                 detailed
                 excludeIds={[sourceId]}
-                placeholder="Выбери получателя"
+                placeholder="Select a recipient"
                 wallets={state.wallets}
                 value={recipientId}
                 onChange={setRecipientId}
@@ -1867,15 +1821,15 @@ function SingleTransferForm({
                   onChange={(event) => setRecipientAddress(event.target.value.trim())}
                 />
                 <button
-                  aria-label="Вставить адрес"
+                  aria-label="Paste address"
                   className="absolute top-1/2 right-2.5 inline-flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-[8px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-primary"
-                  title="Вставить адрес"
+                  title="Paste address"
                   type="button"
                   onClick={() => {
                     void navigator.clipboard
                       .readText()
                       .then((text) => setRecipientAddress(text.trim()))
-                      .catch(() => onToast('Не удалось прочитать буфер обмена', 'error'));
+                      .catch(() => onToast('Could not read the clipboard', 'error'));
                   }}
                 >
                   <ClipboardPaste size={17} />
@@ -1886,14 +1840,14 @@ function SingleTransferForm({
 
           <div className="flex flex-col gap-2.5">
             <div className="flex items-center justify-between gap-3">
-              <TransferFieldLabel label="Сумма" />
+              <TransferFieldLabel label="Amount" />
               <button
                 className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-line-soft bg-raised px-2.5 py-1 text-[11px] font-medium text-faint transition hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
-                title="Подставить максимальную доступную сумму"
+                title="Use the maximum available amount"
                 type="button"
                 onClick={() => applyPreset(100)}
               >
-                Доступно{' '}
+                Available{' '}
                 <b className="font-semibold text-dim">{formatSol(source?.balance ?? 0)} SOL</b>
               </button>
             </div>
@@ -1939,7 +1893,7 @@ function SingleTransferForm({
                 type="button"
                 onClick={() => applyPreset(100)}
               >
-                Максимум
+                Maximum
               </button>
             </div>
           </div>
@@ -1947,7 +1901,7 @@ function SingleTransferForm({
             <div className="grid grid-cols-3 overflow-hidden rounded-[10px] border border-line-soft bg-app/40 max-[520px]:grid-cols-1">
               <div className="px-3 py-2.5 max-[520px]:flex max-[520px]:items-center max-[520px]:justify-between">
                 <span className="block text-[10px] font-semibold tracking-[0.05em] text-faint uppercase">
-                  Сумма
+                  Amount
                 </span>
                 <strong className="mt-1 block text-xs font-semibold text-copy max-[520px]:mt-0">
                   {formatSol(amountNumber)} SOL
@@ -1955,7 +1909,7 @@ function SingleTransferForm({
               </div>
               <div className="border-x border-line-soft px-3 py-2.5 max-[520px]:flex max-[520px]:items-center max-[520px]:justify-between max-[520px]:border-x-0 max-[520px]:border-y">
                 <span className="block text-[10px] font-semibold tracking-[0.05em] text-faint uppercase">
-                  Комиссия ≈
+                  Est. fee
                 </span>
                 <strong className="mt-1 block text-xs font-semibold text-copy max-[520px]:mt-0">
                   {formatSol(estimatedTransferFee)} SOL
@@ -1963,7 +1917,7 @@ function SingleTransferForm({
               </div>
               <div className="px-3 py-2.5 max-[520px]:flex max-[520px]:items-center max-[520px]:justify-between">
                 <span className="block text-[10px] font-semibold tracking-[0.05em] text-faint uppercase">
-                  Спишется ≈
+                  Est. debit
                 </span>
                 <strong className="mt-1 block text-xs font-bold text-primary max-[520px]:mt-0">
                   {formatSol(amountNumber + estimatedTransferFee)} SOL
@@ -1981,7 +1935,7 @@ function SingleTransferForm({
               className="min-w-[190px] max-[520px]:w-full"
               type="submit"
             >
-              {pending ? 'Проверяем…' : 'Проверить перевод'}
+              {pending ? 'Reviewing…' : 'Review transfer'}
             </Button>
           </div>
         </form>
@@ -2044,46 +1998,46 @@ function BatchOperationForm({
 
   const formHint =
     mode === 'equalize' && selectedIds.length < 2
-      ? 'Выбери минимум два кошелька'
+      ? 'Select at least two wallets'
       : selectedIds.length === 0
         ? mode === 'distribute'
-          ? 'Выбери получателей'
-          : 'Выбери кошельки-источники'
+          ? 'Select recipients'
+          : 'Select source wallets'
         : mode === 'distribute' && !sourceId
-          ? 'Выбери кошелёк-отправитель'
+          ? 'Select the sender wallet'
           : mode === 'consolidate' && !recipientId
-            ? 'Выбери кошелёк-получатель'
+            ? 'Select the recipient wallet'
             : mode !== 'equalize' && !amountValid
               ? mode === 'consolidate' && amountIsPercent && amountNumber > 100
-                ? 'Процент должен быть от 0 до 100'
-                : 'Укажи корректную сумму'
+                ? 'Percentage must be between 0 and 100'
+                : 'Enter a valid amount'
               : mode === 'distribute' && sourceWallet && estimatedDebit > sourceWallet.balance
-                ? 'На кошельке недостаточно SOL с учётом комиссий'
+                ? 'The wallet does not have enough SOL including fees'
                 : '';
   const ctaLabel =
     mode === 'distribute'
-      ? 'Проверить рассылку'
+      ? 'Review distribution'
       : mode === 'consolidate'
-        ? 'Проверить сбор'
-        : 'Проверить выравнивание';
+        ? 'Review collection'
+        : 'Review equalization';
   const showSummary = selectedIds.length > 0 && (mode === 'equalize' || amountValid);
   const summaryItems =
     mode === 'distribute'
       ? [
-          { label: 'Получателей', value: String(selectedIds.length) },
-          { label: 'Комиссия ≈', value: `${formatSol(estimatedFee)} SOL` },
-          { label: 'Всего спишется ≈', value: `${formatSol(estimatedDebit)} SOL` },
+          { label: 'Recipients', value: String(selectedIds.length) },
+          { label: 'Est. fee', value: `${formatSol(estimatedFee)} SOL` },
+          { label: 'Est. debit', value: `${formatSol(estimatedDebit)} SOL` },
         ]
       : mode === 'consolidate'
         ? [
-            { label: 'Источников', value: String(selectedIds.length) },
-            { label: 'Комиссия ≈', value: `${formatSol(estimatedFee)} SOL` },
-            { label: 'Получит ≈', value: `${formatSol(estimatedAmount)} SOL` },
+            { label: 'Sources', value: String(selectedIds.length) },
+            { label: 'Est. fee', value: `${formatSol(estimatedFee)} SOL` },
+            { label: 'Est. received', value: `${formatSol(estimatedAmount)} SOL` },
           ]
         : [
-            { label: 'Участников', value: String(selectedIds.length) },
-            { label: 'Общий баланс', value: `${formatSol(selectedBalance)} SOL` },
-            { label: 'Цель на кошелёк ≈', value: `${formatSol(equalizedShare)} SOL` },
+            { label: 'Participants', value: String(selectedIds.length) },
+            { label: 'Combined balance', value: `${formatSol(selectedBalance)} SOL` },
+            { label: 'Target per wallet', value: `${formatSol(equalizedShare)} SOL` },
           ];
 
   const submit = async (event: FormEvent) => {
@@ -2112,23 +2066,23 @@ function BatchOperationForm({
         className="flex min-h-[456px] flex-col max-[980px]:min-h-0"
         title={
           mode === 'distribute'
-            ? 'Новая рассылка'
+            ? 'New distribution'
             : mode === 'consolidate'
-              ? 'Новый сбор'
-              : 'Выравнивание группы'
+              ? 'New collection'
+              : 'Equalize group'
         }
         subtitle={
           mode === 'distribute'
-            ? 'Одна сумма — сразу нескольким получателям'
+            ? 'Send one amount to multiple recipients'
             : mode === 'consolidate'
-              ? 'Собери средства с выбранных кошельков в один'
-              : 'Баланс выбранной группы будет распределён поровну'
+              ? 'Collect funds from selected wallets into one'
+              : 'Distribute the selected group balance evenly'
         }
       >
         {mode === 'distribute' ? (
           <div className="flex flex-col gap-4">
             <div>
-              <TransferFieldLabel label="Отправитель" />
+              <TransferFieldLabel label="Sender" />
               <div className="mt-2">
                 <WalletSelect
                   detailed
@@ -2142,7 +2096,7 @@ function BatchOperationForm({
               </div>
             </div>
             <div>
-              <TransferFieldLabel label="Сумма на каждого" />
+              <TransferFieldLabel label="Amount per recipient" />
               <div className="relative mt-2">
                 <input
                   className="h-12 w-full rounded-[10px] border border-line bg-raised px-4 pr-20 text-[22px] leading-none font-semibold text-ink tabular-nums transition outline-none placeholder:text-faint focus:border-primary focus:ring-3 focus:ring-primary/15"
@@ -2156,7 +2110,7 @@ function BatchOperationForm({
                 </span>
               </div>
               <p className="mt-2 mb-0 text-[11px] leading-relaxed text-faint">
-                Эта сумма будет отправлена каждому выбранному получателю
+                This amount will be sent to each selected recipient
               </p>
             </div>
           </div>
@@ -2164,7 +2118,7 @@ function BatchOperationForm({
         {mode === 'consolidate' ? (
           <div className="flex flex-col gap-4">
             <div>
-              <TransferFieldLabel label="Получатель" />
+              <TransferFieldLabel label="Recipient" />
               <div className="mt-2">
                 <WalletSelect
                   detailed
@@ -2177,9 +2131,9 @@ function BatchOperationForm({
             </div>
             <div>
               <div className="flex items-center justify-between gap-3">
-                <TransferFieldLabel label="Сумма с каждого" />
+                <TransferFieldLabel label="Amount from each" />
                 <span className="rounded-full bg-soft px-2.5 py-1 text-[11px] font-medium text-faint max-[420px]:hidden">
-                  Можно указать SOL или %
+                  Enter SOL or %
                 </span>
               </div>
               <div className="relative mt-2">
@@ -2217,17 +2171,17 @@ function BatchOperationForm({
         ) : null}
         {mode === 'equalize' ? (
           <div>
-            <TransferFieldLabel label="Результат расчёта" />
+            <TransferFieldLabel label="Calculated result" />
             <div className="mt-2 flex min-h-[126px] items-center gap-3 rounded-[11px] border border-line-soft bg-raised/60 p-4">
               <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] bg-primary/15 text-primary">
                 <WalletCards size={21} />
               </span>
               <div className="min-w-0">
                 <strong className="block text-[13px] font-semibold text-copy">
-                  Равная доля для каждого
+                  Equal share for each wallet
                 </strong>
                 <small className="mt-1 block text-xs leading-relaxed text-faint">
-                  Система найдёт минимальный набор переводов и учтёт комиссии сети
+                  NODAL will find the smallest transfer set and account for network fees
                 </small>
               </div>
             </div>
@@ -2271,7 +2225,7 @@ function BatchOperationForm({
               variant="solid"
               type="submit"
             >
-              {pending ? 'Считаем…' : ctaLabel}
+              {pending ? 'Calculating…' : ctaLabel}
             </Button>
           </div>
         </div>
@@ -2279,22 +2233,22 @@ function BatchOperationForm({
       <Panel
         className="min-h-[456px] max-[980px]:min-h-0"
         title={
-          mode === 'distribute' ? 'Получатели' : mode === 'consolidate' ? 'Источники' : 'Участники'
+          mode === 'distribute' ? 'Recipients' : mode === 'consolidate' ? 'Sources' : 'Participants'
         }
         subtitle={
           mode === 'equalize'
-            ? 'Выбери минимум два кошелька для общей группы'
-            : 'Отметь кошельки, которые войдут в операцию'
+            ? 'Select at least two wallets for the group'
+            : 'Choose the wallets included in this operation'
         }
       >
         <div className="mb-2">
           <TransferFieldLabel
             label={
               mode === 'distribute'
-                ? 'Кошельки-получатели'
+                ? 'Recipient wallets'
                 : mode === 'consolidate'
-                  ? 'Кошельки-источники'
-                  : 'Состав группы'
+                  ? 'Source wallets'
+                  : 'Group members'
             }
           />
         </div>
@@ -2357,39 +2311,39 @@ function OperationsPage({
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Операции" />
+      <PageHeader title="Operations" description="Route SOL across local and external accounts" />
       <div className="grid grid-cols-[250px_minmax(0,1fr)] items-start gap-4 max-[1180px]:grid-cols-1">
         <div
-          aria-label="Тип операции"
+          aria-label="Operation type"
           className="grid grid-cols-1 gap-1 rounded-[11px] border border-line-soft bg-surface p-1.5 max-[1180px]:grid-cols-4 max-[760px]:grid-cols-2"
           role="group"
         >
           <OperationModeTab
             active={mode === 'single'}
-            description="Один → одному"
+            description="One → one"
             icon={Send}
-            label="Перевод"
+            label="Transfer"
             onClick={() => onModeChange('single')}
           />
           <OperationModeTab
             active={mode === 'distribute'}
-            description="Один → многим"
+            description="One → many"
             icon={ArrowUpRight}
-            label="Раздать"
+            label="Distribute"
             onClick={() => onModeChange('distribute')}
           />
           <OperationModeTab
             active={mode === 'consolidate'}
-            description="Многие → одному"
+            description="Many → one"
             icon={ArrowDownLeft}
-            label="Собрать"
+            label="Collect"
             onClick={() => onModeChange('consolidate')}
           />
           <OperationModeTab
             active={mode === 'equalize'}
-            description="Общий баланс поровну"
+            description="Even group balance"
             icon={SlidersHorizontal}
-            label="Выровнять"
+            label="Equalize"
             onClick={() => onModeChange('equalize')}
           />
         </div>
@@ -2450,7 +2404,7 @@ function ActivityPage({ state }: { state: WalletState }) {
   const isTransactionEntry = useCallback(
     (entry: ActivityEntry) =>
       Boolean(entry.signature || entry.status) ||
-      /транзакц|перевод|подтвержден|отправлен/i.test(entry.title),
+      /transaction|transfer|confirmed|submitted/i.test(entry.title),
     [],
   );
   const counts = useMemo(
@@ -2467,12 +2421,12 @@ function ActivityPage({ state }: { state: WalletState }) {
         const matchesView =
           view === 'all' ||
           (view === 'errors' ? entry.tone === 'error' : isTransactionEntry(entry));
-        const normalizedQuery = query.trim().toLocaleLowerCase('ru-RU');
+        const normalizedQuery = query.trim().toLocaleLowerCase('en-US');
         const matchesQuery =
           !normalizedQuery ||
           [entry.title, entry.message, entry.signature, entry.error]
             .filter(Boolean)
-            .some((value) => value!.toLocaleLowerCase('ru-RU').includes(normalizedQuery));
+            .some((value) => value!.toLocaleLowerCase('en-US').includes(normalizedQuery));
         return matchesView && matchesQuery;
       }),
     [entries, isTransactionEntry, query, view],
@@ -2497,7 +2451,7 @@ function ActivityPage({ state }: { state: WalletState }) {
       setCopiedId(entry.id);
       window.setTimeout(() => setCopiedId(null), 1_500);
     } catch {
-      setError('Не удалось скопировать запись в буфер обмена.');
+      setError('Could not copy the entry to the clipboard.');
     }
   };
 
@@ -2528,23 +2482,23 @@ function ActivityPage({ state }: { state: WalletState }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Активность" />
+      <PageHeader title="Activity" description="Transactions and local application events" />
       {error ? <ErrorBanner message={error} onRetry={() => void load()} /> : null}
       <Panel className="p-3.5">
         <div className="flex flex-wrap items-center gap-3">
           <label className="flex h-11 min-w-[240px] flex-1 items-center gap-2 rounded-[9px] border border-line bg-raised px-3 text-dim transition focus-within:border-primary/70 focus-within:text-copy">
             <Search aria-hidden="true" size={16} />
             <input
-              aria-label="Поиск по журналу"
+              aria-label="Search activity"
               className="min-w-0 flex-1 border-0 bg-transparent text-[13px] text-ink outline-none placeholder:text-faint"
-              placeholder="Событие, адрес или сигнатура…"
+              placeholder="Event, address, or signature…"
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
             />
             {query ? (
               <button
-                aria-label="Очистить поиск"
+                aria-label="Clear search"
                 className="cursor-pointer border-0 bg-transparent p-0 text-faint hover:text-copy"
                 type="button"
                 onClick={() => setQuery('')}
@@ -2554,15 +2508,15 @@ function ActivityPage({ state }: { state: WalletState }) {
             ) : null}
           </label>
           <div
-            aria-label="Фильтр журнала"
+            aria-label="Activity filter"
             className="inline-flex h-11 shrink-0 flex-wrap gap-1 rounded-[10px] border border-line-soft bg-surface p-1"
             role="group"
           >
             {(
               [
-                ['transactions', 'Транзакции'],
-                ['errors', 'Ошибки'],
-                ['all', 'Все события'],
+                ['transactions', 'Transactions'],
+                ['errors', 'Errors'],
+                ['all', 'All events'],
               ] as const
             ).map(([value, label]) => (
               <button
@@ -2581,14 +2535,14 @@ function ActivityPage({ state }: { state: WalletState }) {
             ))}
           </div>
           <Button
-            aria-label="Экспорт"
+            aria-label="Export"
             className="h-11"
             compact
             disabled={!filteredEntries.length}
             icon={Download}
             onClick={exportEntries}
           >
-            <span className="max-[1180px]:sr-only">Экспорт</span>
+            <span className="max-[1180px]:sr-only">Export</span>
           </Button>
         </div>
       </Panel>
@@ -2597,8 +2551,8 @@ function ActivityPage({ state }: { state: WalletState }) {
           <div>
             <div className="grid h-10 grid-cols-[52px_minmax(280px,1fr)_170px_84px] items-center gap-4 rounded-t-[10px] bg-muted/65 px-5 text-xs font-semibold tracking-[0.06em] text-faint uppercase max-[1180px]:grid-cols-[44px_minmax(240px,1fr)_140px_72px] max-[900px]:hidden">
               <span />
-              <span>Событие</span>
-              <span>Дата и время</span>
+              <span>Event</span>
+              <span>Date and time</span>
               <span />
             </div>
             {filteredEntries.map((entry) => {
@@ -2651,19 +2605,19 @@ function ActivityPage({ state }: { state: WalletState }) {
                     <div className="flex items-center gap-1 justify-self-start">
                       {entry.signature ? (
                         <a
-                          aria-label="Открыть транзакцию в Solscan"
+                          aria-label="Open transaction in Solscan"
                           className="inline-flex h-9 w-9 items-center justify-center rounded-[9px] border border-transparent text-faint transition hover:border-line hover:bg-muted hover:text-copy"
                           href={explorerUrl(entry.signature)}
                           rel="noreferrer"
                           target="_blank"
-                          title="Открыть в Solscan"
+                          title="Open in Solscan"
                         >
                           <ExternalLink size={15} />
                         </a>
                       ) : null}
                       <button
                         aria-expanded={expanded}
-                        aria-label={expanded ? 'Скрыть детали' : 'Показать детали'}
+                        aria-label={expanded ? 'Hide details' : 'Show details'}
                         className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border border-transparent bg-transparent text-faint transition hover:border-line hover:bg-muted hover:text-copy"
                         type="button"
                         onClick={() => setExpandedId(expanded ? null : entry.id)}
@@ -2675,7 +2629,7 @@ function ActivityPage({ state }: { state: WalletState }) {
                   {expanded ? (
                     <div className="mt-3 ml-[68px] rounded-[10px] border border-line-soft bg-app/55 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.015)] max-[900px]:ml-0">
                       <div className="mb-3 flex items-center justify-between gap-3 border-b border-line-soft pb-3">
-                        <strong className="text-xs font-semibold text-copy">Детали события</strong>
+                        <strong className="text-xs font-semibold text-copy">Event details</strong>
                         <div className="flex items-center gap-2">
                           <span className="text-[11px] text-faint">
                             {formatActivityTime(entry.timestamp)}
@@ -2685,16 +2639,16 @@ function ActivityPage({ state }: { state: WalletState }) {
                             icon={copiedId === entry.id ? Check : Copy}
                             onClick={() => void copyEntry(entry)}
                           >
-                            {copiedId === entry.id ? 'Скопировано' : 'Копировать'}
+                            {copiedId === entry.id ? 'Copied' : 'Copy'}
                           </Button>
                         </div>
                       </div>
                       <dl className="m-0 grid grid-cols-[120px_minmax(0,1fr)] gap-x-5 gap-y-3 text-xs leading-relaxed max-[540px]:grid-cols-1 max-[540px]:gap-y-1">
-                        <dt className="font-medium text-faint">Сообщение</dt>
+                        <dt className="font-medium text-faint">Message</dt>
                         <dd className="m-0 break-words text-copy">{entry.message}</dd>
                         {entry.status ? (
                           <>
-                            <dt className="font-medium text-faint max-[540px]:mt-2">Статус</dt>
+                            <dt className="font-medium text-faint max-[540px]:mt-2">Status</dt>
                             <dd className="m-0 text-copy">
                               {transactionStatusLabel(entry.status)}
                             </dd>
@@ -2702,13 +2656,13 @@ function ActivityPage({ state }: { state: WalletState }) {
                         ) : null}
                         {entry.signature ? (
                           <>
-                            <dt className="font-medium text-faint max-[540px]:mt-2">Сигнатура</dt>
+                            <dt className="font-medium text-faint max-[540px]:mt-2">Signature</dt>
                             <dd className="m-0 font-mono break-all text-copy">{entry.signature}</dd>
                           </>
                         ) : null}
                         {entry.error ? (
                           <>
-                            <dt className="font-medium text-faint max-[540px]:mt-2">Ошибка</dt>
+                            <dt className="font-medium text-faint max-[540px]:mt-2">Error</dt>
                             <dd className="m-0 break-words text-danger">{entry.error}</dd>
                           </>
                         ) : null}
@@ -2721,17 +2675,17 @@ function ActivityPage({ state }: { state: WalletState }) {
           </div>
         ) : loading ? (
           <div className="flex min-h-[240px] items-center justify-center gap-3 text-[13px] text-dim">
-            <LoaderCircle className="animate-spin" size={24} /> Загружаем активность…
+            <LoaderCircle className="animate-spin" size={24} /> Loading activity…
           </div>
         ) : (
           <EmptyState
             icon={Activity}
             text={
               entries.length
-                ? 'Измени фильтры или поисковый запрос.'
-                : 'Здесь появятся отправленные транзакции и события приложения.'
+                ? 'Change the filters or search query.'
+                : 'Submitted transactions and application events will appear here.'
             }
-            title={entries.length ? 'Ничего не найдено' : 'История пока пуста'}
+            title={entries.length ? 'Nothing found' : 'No activity yet'}
           />
         )}
       </div>
@@ -2763,19 +2717,21 @@ function SettingsPage({
     state.rpc_error ? null : state.rpc_url,
   );
   const [filePending, setFilePending] = useState(false);
+  const [fileMenuOpen, setFileMenuOpen] = useState(false);
   const [newFileOpen, setNewFileOpen] = useState(false);
   const [newFileName, setNewFileName] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+  const fileMenuRef = useRef<HTMLDivElement>(null);
   const normalizedRpcDraft = rpcDraft.trim();
   const rpcHasChanges = normalizedRpcDraft !== state.rpc_url;
   const rpcStatus =
     rpcResult ??
     (rpcHasChanges
-      ? { message: 'Проверь подключение перед сохранением', tone: 'neutral' as const }
+      ? { message: 'Test the connection before saving', tone: 'neutral' as const }
       : state.rpc_error
-        ? { message: 'RPC недоступен', tone: 'error' as const }
+        ? { message: 'RPC unavailable', tone: 'error' as const }
         : {
-            message: `${state.network}${state.rpc_latency_ms !== null ? ` · ${state.rpc_latency_ms} мс` : ''}`,
+            message: `${state.network}${state.rpc_latency_ms !== null ? ` · ${state.rpc_latency_ms} ms` : ''}`,
             tone: 'success' as const,
           });
 
@@ -2785,6 +2741,14 @@ function SettingsPage({
     setRpcVerifiedUrl(state.rpc_error ? null : state.rpc_url);
     setRpcResult(null);
   }, [state.rpc_error, state.rpc_url]);
+  useEffect(() => {
+    if (!fileMenuOpen) return;
+    const closeFileMenu = (event: MouseEvent) => {
+      if (!fileMenuRef.current?.contains(event.target as Node)) setFileMenuOpen(false);
+    };
+    document.addEventListener('mousedown', closeFileMenu);
+    return () => document.removeEventListener('mousedown', closeFileMenu);
+  }, [fileMenuOpen]);
 
   const testRpc = async () => {
     setRpcPending('test');
@@ -2794,13 +2758,13 @@ function SettingsPage({
       setRpcDraft(normalizedRpcDraft);
       setRpcVerifiedUrl(normalizedRpcDraft);
       setRpcResult({
-        message: `${result.network} · ${result.latency_ms} мс · Solana ${result.version}`,
+        message: `${result.network} · ${result.latency_ms} ms · Solana ${result.version}`,
         tone: 'success',
       });
     } catch (reason) {
       const message = reason instanceof Error ? reason.message : String(reason);
       setRpcVerifiedUrl(null);
-      setRpcResult({ message: 'Не удалось подключиться', tone: 'error' });
+      setRpcResult({ message: 'Connection failed', tone: 'error' });
       onToast(message, 'error');
     } finally {
       setRpcPending(null);
@@ -2811,7 +2775,7 @@ function SettingsPage({
     try {
       await api.saveRpc(normalizedRpcDraft);
       await onReload();
-      onToast('RPC сохранён');
+      onToast('RPC saved');
     } catch (reason) {
       onToast(reason instanceof Error ? reason.message : String(reason), 'error');
     } finally {
@@ -2823,7 +2787,7 @@ function SettingsPage({
     try {
       await api.selectWalletFile(name);
       await onReload();
-      onToast(`Файл ${name} выбран`);
+      onToast(`${name} selected`);
     } catch (reason) {
       onToast(reason instanceof Error ? reason.message : String(reason), 'error');
     } finally {
@@ -2850,18 +2814,7 @@ function SettingsPage({
       setNewFileOpen(false);
       setNewFileName('');
       await onReload();
-      onToast(`Файл ${result.wallet_file} создан`);
-    } catch (reason) {
-      onToast(reason instanceof Error ? reason.message : String(reason), 'error');
-    } finally {
-      setFilePending(false);
-    }
-  };
-  const reloadFile = async () => {
-    setFilePending(true);
-    try {
-      await onReload();
-      onToast('CSV перечитан и проверен');
+      onToast(`${result.wallet_file} created`);
     } catch (reason) {
       onToast(reason instanceof Error ? reason.message : String(reason), 'error');
     } finally {
@@ -2878,15 +2831,19 @@ function SettingsPage({
 
   return (
     <div className="flex max-w-[1180px] flex-col gap-4">
-      <PageHeader title="Настройки" />
+      <PageHeader title="Settings" description="Network and local wallet storage" />
       <div className="grid grid-cols-2 items-start gap-3 max-[980px]:grid-cols-1">
-        <Panel compact title="RPC-подключение">
+        <Panel compact title="RPC connection">
           <div className="flex flex-col gap-2.5">
-            <div className="grid grid-cols-[140px_minmax(0,1fr)] gap-2.5 max-[560px]:grid-cols-1">
-              <div className="flex flex-col gap-1.5 text-[13px] font-semibold text-copy">
-                <span>Сеть</span>
+            <div
+              className={`grid gap-2.5 max-[560px]:grid-cols-1 ${rpcPresetMode === 'custom' ? 'grid-cols-[140px_minmax(0,1fr)]' : 'grid-cols-1'}`}
+            >
+              <div
+                className={`flex flex-col gap-1.5 text-[13px] font-semibold text-copy ${rpcPresetMode === 'custom' ? '' : 'max-w-[240px]'}`}
+              >
+                <span>Network</span>
                 <AppSelect
-                  ariaLabel="Выбор сети"
+                  ariaLabel="Select network"
                   options={[
                     ...rpcPresets.map((preset) => ({
                       value: preset.id,
@@ -2896,7 +2853,7 @@ function SettingsPage({
                     {
                       value: 'custom',
                       label: 'Custom',
-                      description: 'Свой RPC endpoint',
+                      description: 'Custom RPC endpoint',
                     },
                   ]}
                   value={rpcPresetMode}
@@ -2909,30 +2866,29 @@ function SettingsPage({
                   }}
                 />
               </div>
-              <label className="flex flex-col gap-1.5 text-[13px] font-semibold text-copy">
-                HTTP(S) endpoint
-                <input
-                  className="min-h-10 w-full rounded-[9px] border border-line bg-raised px-3.5 text-[13px] font-normal text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15"
-                  spellCheck={false}
-                  value={rpcDraft}
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    setRpcDraft(value);
-                    setRpcPresetMode(
-                      rpcPresets.find((preset) => preset.url === value)?.id ?? 'custom',
-                    );
-                    setRpcVerifiedUrl(null);
-                    setRpcResult(null);
-                  }}
-                />
-              </label>
+              {rpcPresetMode === 'custom' ? (
+                <label className="flex flex-col gap-1.5 text-[13px] font-semibold text-copy">
+                  HTTP(S) endpoint
+                  <input
+                    className="min-h-10 w-full rounded-[9px] border border-line bg-raised px-3.5 text-[13px] font-normal text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15"
+                    spellCheck={false}
+                    value={rpcDraft}
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      setRpcDraft(value);
+                      setRpcVerifiedUrl(null);
+                      setRpcResult(null);
+                    }}
+                  />
+                </label>
+              ) : null}
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <div
-                className={`mr-auto inline-flex items-center gap-2 text-xs ${rpcStatus.tone === 'success' ? 'text-primary' : rpcStatus.tone === 'error' ? 'text-danger' : 'text-dim'}`}
+                className={`mr-auto inline-flex items-center gap-2 text-xs ${rpcStatus.tone === 'success' ? 'text-solana' : rpcStatus.tone === 'error' ? 'text-danger' : 'text-dim'}`}
               >
                 <i
-                  className={`h-2 w-2 rounded-full ${rpcStatus.tone === 'success' ? 'bg-primary' : rpcStatus.tone === 'error' ? 'bg-danger' : 'bg-faint'}`}
+                  className={`h-2 w-2 rounded-full ${rpcStatus.tone === 'success' ? 'bg-solana' : rpcStatus.tone === 'error' ? 'bg-danger' : 'bg-faint'}`}
                 />
                 {rpcStatus.message}
               </div>
@@ -2941,7 +2897,7 @@ function SettingsPage({
                 disabled={Boolean(rpcPending) || !normalizedRpcDraft}
                 onClick={() => void testRpc()}
               >
-                {rpcPending === 'test' ? 'Проверяем…' : 'Проверить'}
+                {rpcPending === 'test' ? 'Testing…' : 'Test'}
               </Button>
               <Button
                 compact
@@ -2952,7 +2908,7 @@ function SettingsPage({
                 variant="solid"
                 onClick={() => void saveRpc()}
               >
-                {rpcPending === 'save' ? 'Сохраняем…' : 'Сохранить'}
+                {rpcPending === 'save' ? 'Saving…' : 'Save'}
               </Button>
             </div>
           </div>
@@ -2960,10 +2916,9 @@ function SettingsPage({
 
         <Panel
           compact
-          title="Файлы кошельков"
-          subtitle="Импорт создаёт отдельный CSV и делает его активным"
+          title="Wallet files"
           actions={
-            <>
+            <div className="relative" ref={fileMenuRef}>
               <input
                 ref={fileRef}
                 accept=".csv,text/csv"
@@ -2971,76 +2926,80 @@ function SettingsPage({
                 type="file"
                 onChange={(event) => void handleFile(event)}
               />
-              <Button
-                compact
+              <button
+                aria-expanded={fileMenuOpen}
+                aria-label="Manage files"
+                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border border-line bg-raised text-faint transition hover:border-line-strong hover:bg-muted hover:text-copy"
                 disabled={filePending}
-                icon={FilePlus2}
-                onClick={() => setNewFileOpen(true)}
+                type="button"
+                onClick={() => setFileMenuOpen((value) => !value)}
               >
-                Создать
-              </Button>
-              <Button
-                compact
-                disabled={filePending}
-                icon={Upload}
-                onClick={() => fileRef.current?.click()}
-              >
-                Импорт CSV
-              </Button>
-            </>
+                <EllipsisVertical size={18} />
+              </button>
+              {fileMenuOpen ? (
+                <div className="absolute top-[calc(100%+6px)] right-0 z-40 w-[190px] rounded-[10px] border border-line bg-raised p-1.5 shadow-[0_16px_42px_rgba(0,0,0,0.38)]">
+                  <button
+                    className="flex min-h-9 w-full cursor-pointer items-center gap-2.5 rounded-[7px] border-0 bg-transparent px-2.5 text-left text-[13px] font-medium text-copy transition hover:bg-muted"
+                    type="button"
+                    onClick={() => {
+                      setFileMenuOpen(false);
+                      setNewFileOpen(true);
+                    }}
+                  >
+                    <FilePlus2 className="text-faint" size={16} />
+                    Create file
+                  </button>
+                  <button
+                    className="flex min-h-9 w-full cursor-pointer items-center gap-2.5 rounded-[7px] border-0 bg-transparent px-2.5 text-left text-[13px] font-medium text-copy transition hover:bg-muted"
+                    type="button"
+                    onClick={() => {
+                      setFileMenuOpen(false);
+                      fileRef.current?.click();
+                    }}
+                  >
+                    <Upload className="text-faint" size={16} />
+                    Import CSV
+                  </button>
+                </div>
+              ) : null}
+            </div>
           }
         >
           <div className="flex flex-col gap-1.5">
-            <label className="text-[13px] font-semibold text-copy">Активный файл</label>
+            <label className="text-[13px] font-semibold text-copy">Active file</label>
             <AppSelect
-              ariaLabel="Выбор активного файла кошельков"
+              ariaLabel="Select active wallet file"
               disabled={filePending}
               options={state.wallet_files.map((name) => ({
                 value: name,
                 label: name,
-                description: name === state.wallet_file ? 'Активный файл' : 'CSV-файл кошельков',
+                description: name === state.wallet_file ? 'Active file' : 'Wallet CSV',
               }))}
               value={state.wallet_file}
               onChange={(value) => void selectFile(value)}
             />
-            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-faint">
-              <span>{formatWalletCount(state.wallet_count)}</span>
-              <span aria-hidden="true">·</span>
-              <span>{formatFileSize(state.wallet_file_size_bytes)}</span>
-              <span aria-hidden="true">·</span>
-              <span>{formatFileModifiedAt(state.wallet_file_modified_at)}</span>
-            </div>
-            <div className="mt-1.5 flex flex-wrap gap-2">
-              <Button
-                compact
-                disabled={filePending}
-                icon={filePending ? LoaderCircle : RefreshCw}
-                onClick={() => void reloadFile()}
-              >
-                Проверить файл
-              </Button>
-              {window.desktopShell?.openWalletFolder ? (
+            <div className="mt-1 text-xs text-faint">{formatWalletCount(state.wallet_count)}</div>
+            {window.desktopShell?.openWalletFolder ? (
+              <div className="mt-1.5 flex flex-wrap gap-2">
                 <Button compact icon={FolderOpen} onClick={() => void openWalletFolder()}>
-                  Открыть папку
+                  Open folder
                 </Button>
-              ) : null}
-            </div>
+              </div>
+            ) : null}
             {state.warnings.length ? (
               <div className="mt-1.5 flex items-start gap-2 rounded-[8px] border border-danger/25 bg-danger/10 px-2.5 py-2 text-xs leading-relaxed text-danger">
                 <TriangleAlert className="mt-0.5 shrink-0" size={15} />
                 <span>
                   {state.warnings[0]}
-                  {state.warnings.length > 1
-                    ? ` Ещё предупреждений: ${state.warnings.length - 1}.`
-                    : ''}
+                  {state.warnings.length > 1 ? ` ${state.warnings.length - 1} more warnings.` : ''}
                 </span>
               </div>
             ) : null}
             <div className="mt-1.5 flex items-start gap-2 rounded-[8px] border border-warning/25 bg-warning/10 px-2.5 py-2 text-xs leading-relaxed text-warning">
               <TriangleAlert className="mt-0.5 shrink-0" size={15} />
               <span>
-                CSV содержит приватные ключи и хранится локально без шифрования. Не передавай файл
-                третьим лицам.
+                The CSV contains private keys and is stored locally without encryption. Never share
+                this file.
               </span>
             </div>
           </div>
@@ -3063,14 +3022,14 @@ function SettingsPage({
             <div className="flex items-start justify-between gap-4 border-b border-line-soft px-5 py-[18px]">
               <div>
                 <h2 className="m-0 text-[17px] font-bold text-ink" id="create-wallet-file-title">
-                  Создать файл кошельков
+                  Create wallet file
                 </h2>
                 <p className="mt-1.5 mb-0 text-xs text-dim">
-                  Пустой CSV станет активным сразу после создания
+                  The empty CSV will become active immediately
                 </p>
               </div>
               <button
-                aria-label="Закрыть"
+                aria-label="Close"
                 className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-ink"
                 disabled={filePending}
                 type="button"
@@ -3084,7 +3043,7 @@ function SettingsPage({
                 className="mb-2 block text-[13px] font-semibold text-copy"
                 htmlFor="new-wallet-file-name"
               >
-                Название
+                Name
               </label>
               <div className="flex min-h-12 items-center rounded-[9px] border border-line bg-raised transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15">
                 <input
@@ -3092,7 +3051,7 @@ function SettingsPage({
                   className="min-w-0 flex-1 border-0 bg-transparent px-3.5 text-sm text-ink outline-none placeholder:text-faint"
                   id="new-wallet-file-name"
                   maxLength={80}
-                  placeholder="Например, trading"
+                  placeholder="For example, trading"
                   spellCheck={false}
                   value={newFileName}
                   onChange={(event) => setNewFileName(event.target.value)}
@@ -3101,7 +3060,7 @@ function SettingsPage({
               </div>
               <div className="mt-5 flex justify-end gap-2 border-t border-line-soft pt-4">
                 <Button disabled={filePending} type="button" onClick={() => setNewFileOpen(false)}>
-                  Отмена
+                  Cancel
                 </Button>
                 <Button
                   disabled={filePending || !newFileName.trim()}
@@ -3110,7 +3069,7 @@ function SettingsPage({
                   type="submit"
                   variant="solid"
                 >
-                  {filePending ? 'Создаём…' : 'Создать'}
+                  {filePending ? 'Creating…' : 'Create'}
                 </Button>
               </div>
             </form>
@@ -3136,7 +3095,7 @@ function SidebarNavItem({
     <div className="group/sidebar-item relative">
       <button
         aria-current={active ? 'page' : undefined}
-        className={`relative flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-[9px] border-0 px-1.5 text-left transition focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:ring-inset ${active ? 'bg-primary/15 text-primary' : 'text-dim hover:bg-raised hover:text-copy'} ${collapsed ? 'justify-center' : ''} max-[900px]:justify-center`}
+        className={`relative flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-[3px] border-0 px-1.5 text-left transition focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:ring-inset ${active ? 'bg-primary/15 text-primary' : 'text-dim hover:bg-raised hover:text-copy'} ${collapsed ? 'justify-center' : ''} max-[900px]:justify-center`}
         type="button"
         onClick={() => onNavigate(id)}
       >
@@ -3181,16 +3140,25 @@ function Sidebar({
         className={`flex min-h-12 items-center gap-2 ${collapsed ? 'justify-center' : 'justify-between'} max-[900px]:justify-center`}
       >
         <div className="flex min-w-0 items-center gap-2.5">
-          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-primary/15 text-primary">
-            <Sparkles size={21} />
+          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[3px] border border-primary bg-surface">
+            <img
+              alt=""
+              aria-hidden="true"
+              className="h-8 w-8 object-contain"
+              src={nodalLogoUrl}
+            />
           </span>
           <div className={`${collapsed ? 'hidden' : 'block'} min-w-0 max-[900px]:hidden`}>
-            <strong className="block text-sm font-bold text-ink">Solana</strong>
-            <small className="mt-0.5 block text-xs font-medium text-faint">Wallet</small>
+            <strong className="block text-[15px] font-bold tracking-[0.13em] text-primary">
+              NODAL
+            </strong>
+            <small className="mt-0.5 block text-[9px] font-semibold tracking-[0.08em] text-dim uppercase">
+              Solana Operations
+            </small>
           </div>
         </div>
         <button
-          aria-label={collapsed ? 'Развернуть меню' : 'Свернуть меню'}
+          aria-label={collapsed ? 'Expand menu' : 'Collapse menu'}
           className={`${collapsed ? 'hidden' : 'inline-flex'} h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-[9px] border border-transparent bg-transparent text-faint transition hover:bg-raised hover:text-primary focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none max-[900px]:hidden`}
           type="button"
           onClick={onCollapse}
@@ -3217,7 +3185,7 @@ function Sidebar({
           onNavigate={onNavigate}
         />
         <button
-          aria-label="Развернуть меню"
+          aria-label="Expand menu"
           className={`${collapsed ? 'mt-2 inline-flex' : 'hidden'} h-10 w-full cursor-pointer items-center justify-center rounded-[9px] border border-transparent bg-transparent text-faint transition hover:bg-raised hover:text-primary focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none max-[900px]:hidden`}
           type="button"
           onClick={onCollapse}
@@ -3329,13 +3297,13 @@ function App() {
       setSendResult(result);
       if (result.ok) {
         showToast(
-          `${result.submitted} транзакц${result.submitted === 1 ? 'ия отправлена' : 'ии отправлены'} в сеть`,
+          `${result.submitted} ${result.submitted === 1 ? 'transaction' : 'transactions'} submitted`,
         );
       } else {
         showToast(
           result.submitted
-            ? `Отправлено ${result.submitted} из ${result.planned}. ${result.error ?? ''}`
-            : (result.error ?? 'Операция не выполнена'),
+            ? `Submitted ${result.submitted} of ${result.planned}. ${result.error ?? ''}`
+            : (result.error ?? 'Operation failed'),
           'error',
         );
       }
@@ -3354,14 +3322,14 @@ function App() {
     void navigator.clipboard
       .writeText(value)
       .then(() => showToast(message))
-      .catch(() => showToast('Не удалось скопировать', 'error'));
+      .catch(() => showToast('Could not copy', 'error'));
   };
 
   const importFile = async (file: File) => {
     try {
       const result = await api.importWalletFile(file);
       await loadState(true);
-      showToast(`Импортировано кошельков: ${result.wallet_count}`);
+      showToast(`Wallets imported: ${result.wallet_count}`);
     } catch (reason) {
       showToast(reason instanceof Error ? reason.message : String(reason), 'error');
     }
@@ -3371,7 +3339,6 @@ function App() {
     activePage === 'overview' ? (
       <OverviewPage
         state={state}
-        onCopy={copy}
         onNavigate={navigate}
         onOpenOperation={openOperation}
         onRetry={() => void loadState(true)}
@@ -3423,7 +3390,7 @@ function App() {
               <TriangleAlert size={28} />
             </span>
             <h1 className="mt-4 text-[28px] font-bold tracking-[-0.03em] text-ink">
-              Не удалось открыть кошелёк
+              Could not open NODAL
             </h1>
             <p className="mt-2 text-[13px] leading-5 text-dim">{loadError}</p>
             <Button
@@ -3433,7 +3400,7 @@ function App() {
               variant="solid"
               onClick={() => void loadState(true)}
             >
-              Повторить подключение
+              Retry connection
             </Button>
             <code className="mt-4 rounded-[8px] bg-raised px-3 py-2 font-mono text-xs text-faint">
               pip install -r requirements.txt
@@ -3445,7 +3412,7 @@ function App() {
               <Sparkles size={25} />
             </span>
             <LoaderCircle className="animate-spin text-primary" size={24} />
-            <p>Подключаем локальный кошелёк…</p>
+            <p>Connecting to the local operations desk…</p>
           </div>
         ) : (
           <div className="mx-auto w-full max-w-[1540px] px-7 py-6 max-[680px]:px-4 max-[680px]:py-5">
@@ -3487,7 +3454,7 @@ function App() {
           {toast.message}
           <button
             className="ml-1 inline-flex cursor-pointer items-center border-0 bg-transparent p-1 text-faint hover:text-ink"
-            aria-label="Закрыть"
+            aria-label="Close"
             type="button"
             onClick={() => setToast(null)}
           >

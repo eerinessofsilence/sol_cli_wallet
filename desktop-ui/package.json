@@ -1,8 +1,8 @@
 {
-  "name": "sol-wallet-desktop-ui",
+  "name": "nodal-desktop-ui",
   "private": true,
   "version": "0.1.0",
-  "description": "Electron + React desktop wallet for Solana",
+  "description": "NODAL — local-first Solana operations desk",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\"",
