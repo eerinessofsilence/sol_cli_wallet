@@ -82,7 +82,7 @@ function createWindow(): BrowserWindow {
     height: 940,
     minWidth: 1040,
     minHeight: 720,
-    backgroundColor: '#e2e0d9',
+    backgroundColor: '#e5e3dc',
     title: 'NODAL — Solana Operations Desk',
     show: false,
     webPreferences: {

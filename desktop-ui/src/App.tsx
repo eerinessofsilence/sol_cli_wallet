@@ -20,8 +20,6 @@ import {
   LayoutDashboard,
   LoaderCircle,
   Network,
-  PanelLeftClose,
-  PanelLeftOpen,
   Pencil,
   Plus,
   RefreshCw,
@@ -51,6 +49,7 @@ import {
   useState,
 } from 'react';
 import { api, ApiError } from './api';
+import { WalletCarousel3D } from './WalletCarousel3D';
 import type {
   ActivityEntry,
   BatchMode,
@@ -168,7 +167,7 @@ function Button({
 }) {
   return (
     <button
-      className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-[4px] border text-[12px] font-semibold tracking-[0.035em] uppercase transition duration-150 disabled:cursor-not-allowed disabled:opacity-45 ${compact ? 'min-h-9 px-3' : 'min-h-10 px-3.5'} ${variant === 'solid' ? (tone === 'danger' ? 'border-danger bg-danger text-surface hover:brightness-105' : 'border-primary bg-primary text-surface hover:border-primary-strong hover:bg-primary-strong') : variant === 'ghost' ? 'border-transparent bg-transparent text-dim hover:bg-muted hover:text-ink' : tone === 'danger' ? 'border-danger/25 bg-danger/10 text-danger hover:border-danger/40' : 'border-line bg-raised text-copy hover:border-line-strong hover:bg-muted'} ${className}`}
+      className={`inline-flex cursor-pointer items-center justify-center gap-3 rounded-[18px] border text-sm font-bold tracking-[0.04em] uppercase transition duration-150 disabled:cursor-not-allowed disabled:opacity-45 ${compact ? 'min-h-10 px-4 py-1.5' : 'min-h-11 min-w-32 px-5 py-2'} ${variant === 'solid' ? (tone === 'danger' ? 'border-danger bg-danger text-surface hover:brightness-105' : 'border-primary bg-primary text-surface hover:border-primary-strong hover:bg-primary-strong') : variant === 'ghost' ? 'border-transparent bg-transparent text-dim hover:bg-muted hover:text-ink' : tone === 'danger' ? 'border-danger/25 bg-danger/10 text-danger hover:border-danger/40' : 'border-line bg-raised text-copy hover:border-line-strong hover:bg-muted'} ${className}`}
       type="button"
       {...props}
     >
@@ -178,24 +177,15 @@ function Button({
   );
 }
 
-function PageHeader({
-  title,
-  description,
-  actions,
-}: {
-  title: string;
-  description?: string;
-  actions?: ReactNode;
-}) {
+function PageHeader({ title, actions }: { title: string; actions?: ReactNode }) {
   return (
     <header className="flex items-start justify-between gap-6 max-[680px]:flex-col max-[680px]:items-stretch">
       <div>
-        <h1 className="m-0 text-[27px] leading-tight font-bold tracking-[0.06em] text-primary uppercase">
+        <h1 className="m-0 text-[28px] leading-tight font-bold tracking-[0.06em] text-primary uppercase">
           {title}
         </h1>
-        {description ? <p className="mt-2 mb-0 text-sm text-dim">{description}</p> : null}
       </div>
-      {actions ? <div className="flex flex-wrap items-center gap-2.5">{actions}</div> : null}
+      {actions ? <div className="flex flex-wrap items-center gap-3">{actions}</div> : null}
     </header>
   );
 }
@@ -217,7 +207,7 @@ function Panel({
 }) {
   return (
     <section
-      className={`rounded-[4px] border border-line bg-surface ${compact ? 'p-4' : 'p-5'} ${className}`}
+      className={`rounded-[18px] border border-line bg-surface ${compact ? 'p-4' : 'p-5'} ${className}`}
     >
       {title || actions ? (
         <div
@@ -255,9 +245,9 @@ function MetricCard({
   detail?: ReactNode;
 }) {
   return (
-    <article className="relative flex flex-col gap-4 overflow-hidden rounded-[4px] border border-line bg-surface p-4 text-primary before:pointer-events-none before:absolute before:top-0 before:right-0 before:left-0 before:h-1 before:bg-current">
-      <div className="flex items-center gap-2.5 text-sm font-bold tracking-[-0.01em] text-copy">
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-[3px] border border-primary/35 bg-primary/10 text-primary">
+    <article className="relative flex flex-col gap-4 overflow-hidden rounded-[18px] border border-line bg-surface p-4 text-primary before:pointer-events-none before:absolute before:top-0 before:right-0 before:left-0 before:h-1 before:bg-current">
+      <div className="flex items-center gap-3 text-sm font-bold tracking-[-0.01em] text-copy">
+        <span className="inline-flex h-10 w-10 items-center justify-center rounded-[16px] border border-primary/35 bg-primary/10 text-primary">
           <Icon size={24} />
         </span>
         <span>{label}</span>
@@ -282,11 +272,11 @@ function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex min-h-[220px] flex-col items-center justify-center rounded-[4px] border border-dashed border-line bg-muted/45 p-[30px] text-center">
-      <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 text-primary">
+    <div className="flex min-h-[220px] flex-col items-center justify-center rounded-[18px] border border-dashed border-line bg-muted/45 p-[30px] text-center">
+      <span className="inline-flex h-12 w-12 items-center justify-center rounded-[12px] bg-primary/15 text-primary">
         <Icon size={26} />
       </span>
-      <h3 className="mt-3.5 mb-0 text-[15px] font-bold text-copy">{title}</h3>
+      <h3 className="mt-4 mb-0 text-[16px] font-bold text-copy">{title}</h3>
       <p className="mt-1.5 mb-4 max-w-[440px] text-xs leading-relaxed text-dim">{text}</p>
       {action}
     </div>
@@ -334,7 +324,7 @@ function WalletSelect({
       <button
         aria-expanded={open}
         aria-haspopup="listbox"
-        className={`flex h-12 w-full cursor-pointer items-center gap-3 rounded-[10px] border bg-raised px-3.5 text-left transition focus-visible:ring-3 focus-visible:ring-primary/15 focus-visible:outline-none ${open ? 'border-primary ring-3 ring-primary/15' : 'border-line hover:border-line-strong'}`}
+        className={`flex h-12 w-full cursor-pointer items-center gap-3 rounded-[16px] border bg-raised px-4 text-left transition focus-visible:ring-3 focus-visible:ring-primary/15 focus-visible:outline-none ${open ? 'border-primary ring-3 ring-primary/15' : 'border-line hover:border-line-strong'}`}
         type="button"
         onClick={() => setOpen((current) => !current)}
       >
@@ -342,16 +332,16 @@ function WalletSelect({
           detailed ? (
             <>
               <span className="min-w-0 flex-1">
-                <strong className="block truncate text-[13px] font-semibold text-copy">
+                <strong className="block truncate text-sm font-semibold text-copy">
                   {/^[0-9]+$/.test(selectedWallet.name)
                     ? `Wallet ${selectedWallet.name}`
                     : selectedWallet.name}
                 </strong>
-                <small className="mt-0.5 block truncate font-mono text-[11px] text-faint">
+                <small className="mt-0.5 block truncate font-mono text-xs text-faint">
                   {selectedWallet.short_address}
                 </small>
               </span>
-              <span className="shrink-0 rounded-full bg-soft px-2.5 py-1 text-xs font-semibold text-dim tabular-nums max-[420px]:hidden">
+              <span className="shrink-0 rounded-full bg-soft px-3 py-1 text-xs font-semibold text-dim tabular-nums max-[420px]:hidden">
                 {formatSol(selectedWallet.balance, true)} SOL
               </span>
             </>
@@ -377,14 +367,14 @@ function WalletSelect({
       </button>
       {open ? (
         <div
-          className="absolute top-[calc(100%+6px)] right-0 left-0 z-50 max-h-[280px] overflow-y-auto rounded-[10px] border border-line bg-raised p-1.5 shadow-[0_18px_45px_rgba(0,0,0,0.38)]"
+          className="absolute top-[calc(100%+6px)] right-0 left-0 z-50 max-h-[280px] overflow-y-auto rounded-[16px] border border-line bg-raised p-1.5 shadow-[0_18px_45px_rgba(0,0,0,0.38)]"
           role="listbox"
         >
           {available.length ? (
             available.map((wallet) => (
               <button
                 aria-selected={wallet.id === value}
-                className={`grid min-h-[52px] w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-[7px] border-0 px-3 text-left transition ${wallet.id === value ? 'bg-primary/15' : 'bg-transparent hover:bg-muted'}`}
+                className={`grid min-h-14 w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-[12px] border-0 px-3 text-left transition ${wallet.id === value ? 'bg-primary/15' : 'bg-transparent hover:bg-muted'}`}
                 key={wallet.id}
                 role="option"
                 type="button"
@@ -394,7 +384,7 @@ function WalletSelect({
                 }}
               >
                 <span className="min-w-0">
-                  <strong className="block overflow-hidden text-[13px] font-semibold text-ellipsis whitespace-nowrap text-copy">
+                  <strong className="block overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap text-copy">
                     {/^[0-9]+$/.test(wallet.name) ? `Wallet ${wallet.name}` : wallet.name}
                   </strong>
                   <small className="mt-0.5 block overflow-hidden font-mono text-xs text-ellipsis whitespace-nowrap text-faint">
@@ -462,7 +452,7 @@ function AppSelect({
         aria-expanded={open}
         aria-haspopup="listbox"
         aria-label={ariaLabel}
-        className={`flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-[9px] border bg-raised px-3.5 text-left text-[13px] transition focus-visible:ring-2 focus-visible:ring-primary/15 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-45 ${
+        className={`flex h-12 w-full cursor-pointer items-center gap-2 rounded-[16px] border bg-raised px-4 text-left text-sm transition focus-visible:ring-2 focus-visible:ring-primary/15 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-45 ${
           open ? 'border-primary ring-2 ring-primary/15' : 'border-line hover:border-line-strong'
         }`}
         disabled={disabled}
@@ -492,7 +482,7 @@ function AppSelect({
       {open ? (
         <div
           aria-label={ariaLabel}
-          className="absolute top-[calc(100%+6px)] right-0 left-0 z-50 min-w-[220px] overflow-hidden rounded-[10px] border border-line bg-raised p-1.5 shadow-[0_18px_45px_rgba(0,0,0,0.38)]"
+          className="absolute top-[calc(100%+6px)] right-0 left-0 z-50 min-w-[220px] overflow-hidden rounded-[16px] border border-line bg-raised p-1.5 shadow-[0_18px_45px_rgba(0,0,0,0.38)]"
           role="listbox"
         >
           {options.map((option) => {
@@ -500,7 +490,7 @@ function AppSelect({
             return (
               <button
                 aria-selected={selected}
-                className={`flex min-h-10 w-full cursor-pointer items-center gap-3 rounded-[7px] border-0 px-3 py-2 text-left transition ${
+                className={`flex min-h-10 w-full cursor-pointer items-center gap-3 rounded-[12px] border-0 px-3 py-2 text-left transition ${
                   selected
                     ? 'bg-primary/15 text-primary'
                     : 'bg-transparent text-copy hover:bg-muted'
@@ -514,17 +504,15 @@ function AppSelect({
                 }}
               >
                 <span className="min-w-0 flex-1">
-                  <strong className="block truncate text-[13px] font-semibold">
-                    {option.label}
-                  </strong>
+                  <strong className="block truncate text-sm font-semibold">{option.label}</strong>
                   {option.description ? (
-                    <small className="mt-0.5 block truncate text-[11px] font-normal text-faint">
+                    <small className="mt-0.5 block truncate text-xs font-normal text-faint">
                       {option.description}
                     </small>
                   ) : null}
                 </span>
                 <span
-                  className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px] ${
+                  className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-[12px] ${
                     selected ? 'bg-primary text-surface' : 'text-transparent'
                   }`}
                 >
@@ -561,25 +549,25 @@ function WalletChecklist({
   };
 
   return (
-    <div className="overflow-hidden rounded-[10px] border border-line-soft bg-raised/30">
-      <div className="flex min-h-12 items-center justify-between gap-3 border-b border-line-soft bg-raised px-3.5">
+    <div className="overflow-hidden rounded-[16px] border border-line-soft bg-raised/30">
+      <div className="flex min-h-12 items-center justify-between gap-3 border-b border-line-soft bg-raised px-4">
         <button
-          className="flex cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-left text-xs font-semibold text-dim transition hover:text-copy"
+          className="flex cursor-pointer items-center gap-3 border-0 bg-transparent p-0 text-left text-xs font-semibold text-dim transition hover:text-copy"
           type="button"
           onClick={() => onChange(allSelected ? [] : available.map((wallet) => wallet.id))}
         >
           <span
-            className={`inline-flex h-[18px] w-[18px] flex-none items-center justify-center rounded-[5px] border transition ${allSelected ? 'border-primary bg-primary text-surface' : 'border-line bg-surface text-transparent'}`}
+            className={`inline-flex h-[18px] w-[18px] flex-none items-center justify-center rounded-[12px] border transition ${allSelected ? 'border-primary bg-primary text-surface' : 'border-line bg-surface text-transparent'}`}
           >
             {allSelected ? <Check size={14} /> : null}
           </span>
           {allSelected ? 'Clear selection' : 'Select all'}
         </button>
         <div className="flex items-center gap-2">
-          <span className="rounded-full bg-soft px-2.5 py-1 text-[11px] font-semibold text-dim">
+          <span className="rounded-full bg-soft px-3 py-1 text-xs font-semibold text-dim">
             {selectedWallets.length} of {available.length}
           </span>
-          <span className="text-[11px] font-medium text-faint tabular-nums max-[520px]:hidden">
+          <span className="text-xs font-medium text-faint tabular-nums max-[520px]:hidden">
             {formatSol(selectedBalance, true)} SOL selected
           </span>
         </div>
@@ -593,17 +581,17 @@ function WalletChecklist({
               <button
                 aria-pressed={checked}
                 key={wallet.id}
-                className={`grid min-h-[60px] w-full cursor-pointer grid-cols-[18px_36px_minmax(0,1fr)_auto] items-center gap-2.5 border-0 border-t border-line-soft px-3.5 text-left transition first:border-t-0 ${checked ? 'bg-primary/10' : 'bg-surface hover:bg-muted/55'}`}
+                className={`grid min-h-14 w-full cursor-pointer grid-cols-[18px_36px_minmax(0,1fr)_auto] items-center gap-3 border-0 border-t border-line-soft px-4 text-left transition first:border-t-0 ${checked ? 'bg-primary/10' : 'bg-surface hover:bg-muted/55'}`}
                 type="button"
                 onClick={() => toggle(wallet.id)}
               >
                 <span
-                  className={`inline-flex h-[18px] w-[18px] items-center justify-center rounded-[5px] border transition ${checked ? 'border-primary bg-primary text-surface' : 'border-line bg-surface text-transparent'}`}
+                  className={`inline-flex h-[18px] w-[18px] items-center justify-center rounded-[12px] border transition ${checked ? 'border-primary bg-primary text-surface' : 'border-line bg-surface text-transparent'}`}
                 >
                   {checked ? <Check size={14} /> : null}
                 </span>
                 <span
-                  className={`inline-flex h-9 w-9 items-center justify-center rounded-[9px] border text-xs font-bold transition ${
+                  className={`inline-flex h-9 w-9 items-center justify-center rounded-[16px] border text-xs font-bold transition ${
                     checked
                       ? 'border-primary/35 bg-primary/20 text-primary'
                       : 'border-line bg-raised text-dim'
@@ -615,7 +603,7 @@ function WalletChecklist({
                   <strong className="block truncate text-xs font-semibold text-copy">
                     {walletName}
                   </strong>
-                  <small className="mt-0.5 block truncate font-mono text-[11px] text-faint">
+                  <small className="mt-0.5 block truncate font-mono text-xs text-faint">
                     {wallet.short_address}
                   </small>
                 </span>
@@ -637,7 +625,7 @@ function WalletChecklist({
 
 function ErrorBanner({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
-    <div className="flex items-center gap-2.5 rounded-[10px] border border-danger/25 bg-danger/10 px-3 py-2.5 text-xs leading-relaxed text-danger">
+    <div className="flex items-center gap-3 rounded-[16px] border border-danger/25 bg-danger/10 px-3 py-3 text-xs leading-relaxed text-danger">
       <TriangleAlert size={19} />
       <span className="flex-1">{message}</span>
       {onRetry ? (
@@ -687,17 +675,17 @@ function PreviewDialog({
       <section
         aria-labelledby="preview-title"
         aria-modal="true"
-        className="max-h-[calc(100vh-48px)] w-full max-w-[760px] overflow-y-auto rounded-[15px] border border-line bg-surface shadow-[0_18px_50px_rgba(8,8,11,0.32)]"
+        className="max-h-[calc(100vh-48px)] w-full max-w-[760px] overflow-y-auto rounded-[22px] border border-line bg-surface shadow-[0_18px_50px_rgba(8,8,11,0.32)]"
         role="dialog"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 border-b border-line-soft px-5 py-[18px]">
           <div className="flex items-center gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] bg-primary/15 text-primary">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-[16px] bg-primary/15 text-primary">
               <ShieldCheck size={22} />
             </span>
             <div>
-              <h2 className="m-0 text-[17px] font-bold text-ink" id="preview-title">
+              <h2 className="m-0 text-[18px] font-bold text-ink" id="preview-title">
                 Review transfer
               </h2>
               <p className="mt-1 mb-0 text-xs text-dim">
@@ -707,7 +695,7 @@ function PreviewDialog({
           </div>
           <button
             aria-label="Close"
-            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-ink disabled:cursor-not-allowed disabled:opacity-45"
+            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[16px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-ink disabled:cursor-not-allowed disabled:opacity-45"
             disabled={sending}
             type="button"
             onClick={onClose}
@@ -716,20 +704,20 @@ function PreviewDialog({
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-2.5 px-5 pt-[18px] max-[680px]:grid-cols-1">
-          <div className="rounded-[10px] border border-line-soft bg-raised p-3">
+        <div className="grid grid-cols-3 gap-3 px-5 pt-[18px] max-[680px]:grid-cols-1">
+          <div className="rounded-[16px] border border-line-soft bg-raised p-3">
             <span className="block text-xs text-faint">Recipients</span>
             <strong className="mt-1 block text-sm font-bold text-ink">
               {preview.transfer_count}
             </strong>
           </div>
-          <div className="rounded-[10px] border border-line-soft bg-raised p-3">
+          <div className="rounded-[16px] border border-line-soft bg-raised p-3">
             <span className="block text-xs text-faint">Amount</span>
             <strong className="mt-1 block text-sm font-bold text-ink">
               {formatSol(preview.total_amount)} SOL
             </strong>
           </div>
-          <div className="rounded-[10px] border border-line-soft bg-raised p-3">
+          <div className="rounded-[16px] border border-line-soft bg-raised p-3">
             <span className="block text-xs text-faint">Est. fee</span>
             <strong className="mt-1 block text-sm font-bold text-ink">
               {formatSol(preview.estimated_fee)} SOL
@@ -741,7 +729,7 @@ function PreviewDialog({
           <div className="mx-5 mt-3 flex flex-col gap-2">
             {visibleWarnings.map((warning) => (
               <div
-                className={`flex items-start gap-2.5 rounded-[9px] border px-3 py-2.5 text-xs leading-relaxed ${
+                className={`flex items-start gap-3 rounded-[16px] border px-3 py-3 text-xs leading-relaxed ${
                   warning.severity === 'danger'
                     ? 'border-danger/25 bg-danger/10 text-danger'
                     : 'border-warning/25 bg-warning/10 text-warning'
@@ -755,14 +743,14 @@ function PreviewDialog({
           </div>
         ) : null}
 
-        <div className="mx-5 mt-3 max-h-[280px] overflow-y-auto rounded-[10px] border border-line-soft">
+        <div className="mx-5 mt-3 max-h-[280px] overflow-y-auto rounded-[16px] border border-line-soft">
           {preview.transfers.map((transfer, index) => (
             <div
-              className="grid min-h-[82px] grid-cols-[minmax(0,1fr)_18px_minmax(0,1fr)_auto] items-center gap-3 border-t border-line-soft px-3 py-2.5 first:border-t-0 max-[620px]:grid-cols-[minmax(0,1fr)_18px_minmax(0,1fr)]"
+              className="grid min-h-20 grid-cols-[minmax(0,1fr)_18px_minmax(0,1fr)_auto] items-center gap-3 border-t border-line-soft px-3 py-3 first:border-t-0 max-[620px]:grid-cols-[minmax(0,1fr)_18px_minmax(0,1fr)]"
               key={`${transfer.sender_id}-${transfer.recipient}-${index}`}
             >
               <div className="min-w-0">
-                <span className="block text-[9px] font-semibold tracking-[0.06em] text-faint uppercase">
+                <span className="block text-[10px] font-semibold tracking-[0.06em] text-faint uppercase">
                   Sender
                 </span>
                 <strong className="mt-0.5 block truncate text-xs font-semibold text-copy">
@@ -774,7 +762,7 @@ function PreviewDialog({
               </div>
               <ArrowRight className="shrink-0 text-primary" size={16} />
               <div className="min-w-0">
-                <span className="block text-[9px] font-semibold tracking-[0.06em] text-faint uppercase">
+                <span className="block text-[10px] font-semibold tracking-[0.06em] text-faint uppercase">
                   Recipient
                 </span>
                 <strong className="mt-0.5 block truncate text-xs font-semibold text-copy">
@@ -791,9 +779,9 @@ function PreviewDialog({
           ))}
         </div>
 
-        <div className="mx-5 mt-3.5 flex items-center justify-between gap-3 rounded-[9px] bg-primary/15 px-3.5 py-3">
+        <div className="mx-5 mt-4 flex items-center justify-between gap-3 rounded-[16px] bg-primary/15 px-4 py-3">
           <span className="text-xs text-dim">Total debit including fees</span>
-          <strong className="text-[13px] font-bold text-primary">
+          <strong className="text-sm font-bold text-primary">
             ≈ {formatSol(preview.total_debit)} SOL
           </strong>
         </div>
@@ -810,7 +798,7 @@ function PreviewDialog({
           </span>
         </div>
         {preview.requires_acknowledgement ? (
-          <label className="mx-5 mt-3 flex cursor-pointer items-start gap-3 rounded-[9px] border border-line bg-raised px-3.5 py-3 text-xs leading-relaxed text-copy">
+          <label className="mx-5 mt-3 flex cursor-pointer items-start gap-3 rounded-[16px] border border-line bg-raised px-4 py-3 text-xs leading-relaxed text-copy">
             <input
               checked={acknowledged}
               className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
@@ -866,21 +854,21 @@ function SendResultDialog({
       <section
         aria-labelledby="send-result-title"
         aria-modal="true"
-        className="max-h-[calc(100vh-48px)] w-full max-w-[760px] overflow-y-auto rounded-[15px] border border-line bg-surface shadow-[0_18px_50px_rgba(8,8,11,0.32)]"
+        className="max-h-[calc(100vh-48px)] w-full max-w-[760px] overflow-y-auto rounded-[22px] border border-line bg-surface shadow-[0_18px_50px_rgba(8,8,11,0.32)]"
         role="dialog"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 border-b border-line-soft px-5 py-[18px]">
           <div className="flex items-center gap-3">
             <span
-              className={`inline-flex h-10 w-10 items-center justify-center rounded-[10px] ${
+              className={`inline-flex h-10 w-10 items-center justify-center rounded-[16px] ${
                 result.ok ? 'bg-primary/15 text-primary' : 'bg-warning/10 text-warning'
               }`}
             >
               {result.ok ? <CheckCircle2 size={22} /> : <TriangleAlert size={22} />}
             </span>
             <div>
-              <h2 className="m-0 text-[17px] font-bold text-ink" id="send-result-title">
+              <h2 className="m-0 text-[18px] font-bold text-ink" id="send-result-title">
                 {result.ok ? 'Operation submitted' : 'Operation partially completed'}
               </h2>
               <p className="mt-1 mb-0 text-xs text-dim">
@@ -890,7 +878,7 @@ function SendResultDialog({
           </div>
           <button
             aria-label="Close result"
-            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-ink"
+            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[16px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-ink"
             type="button"
             onClick={onClose}
           >
@@ -898,19 +886,19 @@ function SendResultDialog({
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-2.5 px-5 pt-[18px] max-[680px]:grid-cols-1">
-          <div className="rounded-[10px] border border-line-soft bg-raised p-3">
+        <div className="grid grid-cols-3 gap-3 px-5 pt-[18px] max-[680px]:grid-cols-1">
+          <div className="rounded-[16px] border border-line-soft bg-raised p-3">
             <span className="block text-xs text-faint">Planned</span>
             <strong className="mt-1 block text-sm font-bold text-ink">{result.planned}</strong>
           </div>
-          <div className="rounded-[10px] border border-primary/20 bg-primary/10 p-3">
+          <div className="rounded-[16px] border border-primary/20 bg-primary/10 p-3">
             <span className="block text-xs text-dim">Submitted</span>
             <strong className="mt-1 block text-sm font-bold text-primary">
               {result.submitted}
             </strong>
           </div>
           <div
-            className={`rounded-[10px] border p-3 ${
+            className={`rounded-[16px] border p-3 ${
               result.failed ? 'border-danger/20 bg-danger/10' : 'border-line-soft bg-raised'
             }`}
           >
@@ -925,14 +913,14 @@ function SendResultDialog({
           </div>
         </div>
 
-        <div className="mx-5 mt-3 max-h-[320px] overflow-y-auto rounded-[10px] border border-line-soft">
+        <div className="mx-5 mt-3 max-h-[320px] overflow-y-auto rounded-[16px] border border-line-soft">
           {result.results.map((item, index) => (
             <div
-              className="grid min-h-[66px] grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-3 border-t border-line-soft px-3 py-2 first:border-t-0"
+              className="grid min-h-20 grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-3 border-t border-line-soft px-3 py-2 first:border-t-0"
               key={`${item.sender_id}-${item.recipient}-${index}`}
             >
               <span
-                className={`inline-flex h-7 w-7 items-center justify-center rounded-lg ${
+                className={`inline-flex h-7 w-7 items-center justify-center rounded-[12px] ${
                   item.status === 'failed'
                     ? 'bg-danger/10 text-danger'
                     : 'bg-primary/15 text-primary'
@@ -945,7 +933,7 @@ function SendResultDialog({
                   {item.sender_name} → {item.recipient_label}
                 </strong>
                 <small
-                  className={`mt-1 block truncate text-[11px] ${
+                  className={`mt-1 block truncate text-xs ${
                     item.status === 'failed' ? 'text-danger' : 'text-faint'
                   }`}
                 >
@@ -963,7 +951,7 @@ function SendResultDialog({
         </div>
 
         {result.retry_preview ? (
-          <div className="mx-5 mt-3 flex items-start gap-2.5 rounded-[9px] border border-warning/25 bg-warning/10 px-3 py-2.5 text-xs leading-relaxed text-warning">
+          <div className="mx-5 mt-3 flex items-start gap-3 rounded-[16px] border border-warning/25 bg-warning/10 px-3 py-3 text-xs leading-relaxed text-warning">
             <TriangleAlert className="mt-0.5 shrink-0" size={17} />
             <span>Failed transfers can be reviewed and submitted separately.</span>
           </div>
@@ -990,11 +978,13 @@ function OverviewPage({
   onRetry,
   onNavigate,
   onOpenOperation,
+  onTransfer,
 }: {
   state: WalletState;
   onRetry: () => void;
   onNavigate: (page: PageId) => void;
   onOpenOperation: (mode: OperationMode) => void;
+  onTransfer: (walletId: string) => void;
 }) {
   const topWallets = [...state.wallets].sort((a, b) => b.balance - a.balance).slice(0, 5);
   const [activity, setActivity] = useState<ActivityEntry[]>([]);
@@ -1028,11 +1018,11 @@ function OverviewPage({
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Overview" description="Solana operations at a glance" />
+      <PageHeader title="Overview" />
       {state.rpc_error ? <ErrorBanner message={state.rpc_error} onRetry={onRetry} /> : null}
       {state.pending_transaction_count ? (
         <button
-          className="flex min-h-12 w-full cursor-pointer items-center gap-3 rounded-[10px] border border-primary/25 bg-primary/10 px-3.5 text-left text-xs text-copy transition hover:border-primary/40 hover:bg-primary/15"
+          className="flex min-h-12 w-full cursor-pointer items-center gap-3 rounded-[16px] border border-primary/25 bg-primary/10 px-4 text-left text-xs text-copy transition hover:border-primary/40 hover:bg-primary/15"
           type="button"
           onClick={() => onNavigate('activity')}
         >
@@ -1043,6 +1033,13 @@ function OverviewPage({
           </span>
           <ChevronRight className="shrink-0 text-primary" size={17} />
         </button>
+      ) : null}
+      {state.wallets.length ? (
+        <WalletCarousel3D
+          wallets={state.wallets}
+          onManage={() => onNavigate('wallets')}
+          onTransfer={onTransfer}
+        />
       ) : null}
       <div className="grid grid-cols-[minmax(0,1.55fr)_minmax(300px,0.75fr)] gap-4 max-[1180px]:grid-cols-1">
         <div className="col-start-1 row-start-1 grid grid-cols-2 gap-4 max-[680px]:grid-cols-1">
@@ -1056,7 +1053,9 @@ function OverviewPage({
             icon={Activity}
             label="24h movement"
             value={movement24h ? `${formatSol(movement24h, true)} SOL` : 'No transfers'}
-            detail={movement24h ? 'Submitted from this wallet set' : 'No local activity in the last 24h'}
+            detail={
+              movement24h ? 'Submitted from this wallet set' : 'No local activity in the last 24h'
+            }
           />
         </div>
 
@@ -1080,10 +1079,10 @@ function OverviewPage({
                     className="grid min-h-12 grid-cols-[minmax(150px,0.65fr)_minmax(300px,1.5fr)] items-center gap-3 border-t border-line-soft px-1 first:border-t-0 max-[680px]:grid-cols-1 max-[680px]:gap-y-1.5 max-[680px]:py-2"
                     key={wallet.id}
                   >
-                    <strong className="block min-w-0 overflow-hidden text-[13px] font-semibold text-ellipsis whitespace-nowrap text-copy">
+                    <strong className="block min-w-0 overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap text-copy">
                       {/^[0-9]+$/.test(wallet.name) ? `Wallet ${wallet.name}` : wallet.name}
                     </strong>
-                    <div className="flex min-w-0 items-center gap-2.5">
+                    <div className="flex min-w-0 items-center gap-3">
                       <span className="w-12 shrink-0 text-right text-xs font-semibold text-dim tabular-nums">
                         {portfolioPercentFormatter.format(portfolioShare)}%
                       </span>
@@ -1093,7 +1092,7 @@ function OverviewPage({
                           style={{ width: `${Math.min(100, portfolioShare)}%` }}
                         />
                       </div>
-                      <b className="min-w-[98px] text-right text-[13px] font-bold whitespace-nowrap text-ink tabular-nums">
+                      <b className="min-w-[98px] text-right text-sm font-bold whitespace-nowrap text-ink tabular-nums">
                         {formatSol(wallet.balance, true)}{' '}
                         <small className="text-xs font-medium text-faint">SOL</small>
                       </b>
@@ -1118,16 +1117,16 @@ function OverviewPage({
 
         <div className="col-start-2 row-span-2 row-start-1 flex flex-col gap-4 self-start max-[1180px]:col-start-1 max-[1180px]:row-span-1 max-[1180px]:row-start-2">
           <div
-            className={`flex min-h-[72px] w-full items-center gap-3 rounded-[4px] border bg-surface p-4 ${state.rpc_error ? 'border-danger/25' : 'border-line'}`}
+            className={`flex min-h-[72px] w-full items-center gap-3 rounded-[18px] border bg-surface p-4 ${state.rpc_error ? 'border-danger/25' : 'border-line'}`}
           >
             <span
-              className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[3px] ${state.rpc_error ? 'bg-danger/10 text-danger' : 'bg-solana/10 text-solana'}`}
+              className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] ${state.rpc_error ? 'bg-danger/10 text-danger' : 'bg-solana/10 text-solana'}`}
             >
               <Network size={20} />
             </span>
             <div className="min-w-0 flex-1">
-              <strong className="block text-[15px] font-bold text-copy">{state.network}</strong>
-              <small className="mt-1 block overflow-hidden text-[13px] text-ellipsis whitespace-nowrap text-faint">
+              <strong className="block text-[16px] font-bold text-copy">{state.network}</strong>
+              <small className="mt-1 block overflow-hidden text-sm text-ellipsis whitespace-nowrap text-faint">
                 {state.rpc_error ? 'RPC unavailable' : state.rpc_host}
               </small>
             </div>
@@ -1157,7 +1156,7 @@ function OverviewPage({
               />
               <button
                 aria-label="Change network"
-                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border border-line bg-raised text-faint transition hover:border-line-strong hover:bg-muted hover:text-primary"
+                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[16px] border border-line bg-raised text-faint transition hover:border-line-strong hover:bg-muted hover:text-primary"
                 title="Change network"
                 type="button"
                 onClick={() => onNavigate('settings')}
@@ -1170,29 +1169,29 @@ function OverviewPage({
           <Panel title="Quick actions">
             <div className="flex flex-col gap-2">
               <button
-                className="flex min-h-[58px] w-full cursor-pointer items-center gap-3 rounded-[10px] border border-line-soft bg-raised p-2.5 text-left transition hover:-translate-y-px hover:border-line-strong hover:bg-muted"
+                className="flex min-h-[72px] w-full cursor-pointer items-center gap-3 rounded-[16px] border border-line-soft bg-raised p-3 text-left transition hover:-translate-y-px hover:border-line-strong hover:bg-muted"
                 type="button"
                 onClick={() => onOpenOperation('single')}
               >
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] bg-primary/15 text-primary">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[16px] bg-primary/15 text-primary">
                   <Send size={21} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <strong className="block text-[13px] font-semibold text-copy">Send SOL</strong>
+                  <strong className="block text-sm font-semibold text-copy">Send SOL</strong>
                   <small className="mt-0.5 block text-xs text-faint">Single recipient</small>
                 </div>
                 <ChevronRight className="text-faint" size={18} />
               </button>
               <button
-                className="flex min-h-[58px] w-full cursor-pointer items-center gap-3 rounded-[10px] border border-line-soft bg-raised p-2.5 text-left transition hover:-translate-y-px hover:border-line-strong hover:bg-muted"
+                className="flex min-h-[72px] w-full cursor-pointer items-center gap-3 rounded-[16px] border border-line-soft bg-raised p-3 text-left transition hover:-translate-y-px hover:border-line-strong hover:bg-muted"
                 type="button"
                 onClick={() => onOpenOperation('distribute')}
               >
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] bg-primary/15 text-primary">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[16px] bg-primary/15 text-primary">
                   <Zap size={21} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <strong className="block text-[13px] font-semibold text-copy">
+                  <strong className="block text-sm font-semibold text-copy">
                     Batch operations
                   </strong>
                   <small className="mt-0.5 block text-xs text-faint">
@@ -1234,6 +1233,7 @@ function WalletsPage({
   const [addingWallet, setAddingWallet] = useState(false);
   const [editingWallet, setEditingWallet] = useState<WalletRow | null>(null);
   const [deletingWallet, setDeletingWallet] = useState<WalletRow | null>(null);
+  const [openWalletActionsId, setOpenWalletActionsId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [addName, setAddName] = useState('');
   const [addPrivateKey, setAddPrivateKey] = useState('');
@@ -1344,7 +1344,7 @@ function WalletsPage({
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Wallets" description="Local accounts and balances" />
+      <PageHeader title="Wallets" />
       <Panel className="p-0">
         <div className="flex items-center justify-between gap-4 p-[18px] max-[680px]:flex-col max-[680px]:items-stretch">
           <label className="relative block w-full max-w-[280px] max-[680px]:max-w-none">
@@ -1353,13 +1353,13 @@ function WalletsPage({
               size={17}
             />
             <input
-              className="h-10 w-full rounded-[9px] border border-line bg-raised py-2.5 pr-3.5 pl-10 text-[13px] text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15"
+              className="h-10 w-full rounded-[16px] border border-line bg-raised py-3 pr-3.5 pl-10 text-sm text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15"
               placeholder="Search by name or address"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
             />
           </label>
-          <div className="flex shrink-0 items-center gap-2.5 max-[680px]:grid max-[680px]:grid-cols-2">
+          <div className="flex shrink-0 items-center gap-3 max-[680px]:grid max-[680px]:grid-cols-2">
             <input ref={inputRef} accept=".csv,text/csv" hidden type="file" onChange={handleFile} />
             <Button
               className="h-10"
@@ -1376,7 +1376,7 @@ function WalletsPage({
           </div>
         </div>
         {filtered.length ? (
-          <div className="relative mx-[18px] mb-[18px] overflow-hidden rounded-[10px]">
+          <div className="relative mx-[18px] mb-[18px] rounded-[16px]">
             <div className="grid h-10 grid-cols-[minmax(160px,0.55fr)_minmax(220px,1.4fr)_190px_52px] items-center gap-4 bg-muted/65 px-5 text-xs font-semibold tracking-[0.06em] text-faint uppercase max-[1180px]:grid-cols-[minmax(140px,0.55fr)_minmax(180px,1fr)_150px_40px] max-[680px]:hidden">
               {sortHeader('name', 'Name')}
               <span>Public address</span>
@@ -1385,7 +1385,7 @@ function WalletsPage({
             </div>
             {filtered.map((wallet) => (
               <div
-                className="relative grid min-h-[72px] grid-cols-[minmax(160px,0.55fr)_minmax(220px,1.4fr)_190px_52px] items-center gap-4 border-t border-line-soft px-5 transition hover:z-20 hover:bg-muted/40 max-[1180px]:grid-cols-[minmax(140px,0.55fr)_minmax(180px,1fr)_150px_40px] max-[680px]:grid-cols-[minmax(0,1fr)_auto] max-[680px]:gap-2 max-[680px]:py-3"
+                className={`relative grid min-h-[72px] grid-cols-[minmax(160px,0.55fr)_minmax(220px,1.4fr)_190px_52px] items-center gap-4 border-t border-line-soft bg-raised/45 px-5 transition hover:bg-muted/55 max-[1180px]:grid-cols-[minmax(140px,0.55fr)_minmax(180px,1fr)_150px_40px] max-[680px]:grid-cols-[minmax(0,1fr)_auto] max-[680px]:gap-2 max-[680px]:py-3 ${openWalletActionsId === wallet.id ? 'z-30' : 'hover:z-20'}`}
                 key={wallet.id}
               >
                 <div className="min-w-0">
@@ -1399,7 +1399,7 @@ function WalletsPage({
                   type="button"
                   onClick={() => onCopy(wallet.pubkey, 'Address copied')}
                 >
-                  <code className="overflow-hidden font-mono text-[15px] font-medium text-ellipsis whitespace-nowrap">
+                  <code className="overflow-hidden font-mono text-[16px] font-medium text-ellipsis whitespace-nowrap">
                     {wallet.short_address}
                   </code>
                   <Copy className="shrink-0 text-faint" size={16} />
@@ -1410,43 +1410,58 @@ function WalletsPage({
                   </strong>
                   <small className="text-xs text-faint">SOL</small>
                 </div>
-                <div className="group/actions relative justify-self-start max-[680px]:hidden">
+                <div className="relative justify-self-start max-[680px]:hidden">
                   <button
+                    aria-expanded={openWalletActionsId === wallet.id}
                     aria-label={`Actions for ${wallet.name}`}
-                    className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border border-transparent bg-transparent text-faint transition hover:border-line hover:bg-muted hover:text-ink focus:border-line focus:bg-muted focus:text-ink"
+                    className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[16px] border border-transparent bg-transparent text-faint transition hover:border-line hover:bg-muted hover:text-ink focus:border-line focus:bg-muted focus:text-ink"
                     type="button"
+                    onClick={() =>
+                      setOpenWalletActionsId((current) =>
+                        current === wallet.id ? null : wallet.id,
+                      )
+                    }
                   >
                     <EllipsisVertical size={19} />
                   </button>
-                  <div className="pointer-events-none invisible absolute top-0 right-full z-40 mr-2 w-[160px] rounded-[10px] border border-line bg-raised p-1.5 opacity-0 shadow-[0_16px_42px_rgba(0,0,0,0.38)] transition group-focus-within/actions:pointer-events-auto group-focus-within/actions:visible group-focus-within/actions:opacity-100 group-hover/actions:pointer-events-auto group-hover/actions:visible group-hover/actions:opacity-100">
-                    <button
-                      className="flex min-h-9 w-full cursor-pointer items-center gap-2.5 rounded-[7px] border-0 bg-transparent px-2.5 text-left text-[13px] font-medium text-copy transition hover:bg-muted"
-                      type="button"
-                      onClick={() => onTransfer(wallet.id)}
-                    >
-                      <ArrowUpRight className="text-faint" size={16} />
-                      Send
-                    </button>
-                    <button
-                      className="flex min-h-9 w-full cursor-pointer items-center gap-2.5 rounded-[7px] border-0 bg-transparent px-2.5 text-left text-[13px] font-medium text-copy transition hover:bg-muted"
-                      type="button"
-                      onClick={() => {
-                        setEditingWallet(wallet);
-                        setEditName(wallet.name);
-                      }}
-                    >
-                      <Pencil className="text-faint" size={16} />
-                      Rename
-                    </button>
-                    <button
-                      className="flex min-h-9 w-full cursor-pointer items-center gap-2.5 rounded-[7px] border-0 bg-transparent px-2.5 text-left text-[13px] font-medium text-danger transition hover:bg-danger/10"
-                      type="button"
-                      onClick={() => setDeletingWallet(wallet)}
-                    >
-                      <Trash2 size={16} />
-                      Delete
-                    </button>
-                  </div>
+                  {openWalletActionsId === wallet.id ? (
+                    <div className="absolute top-0 right-full z-50 mr-2 w-[160px] rounded-[16px] border border-line bg-raised p-1.5 shadow-[0_8px_22px_rgba(65,55,43,0.16)]">
+                      <button
+                        className="flex min-h-10 w-full cursor-pointer items-center gap-3 rounded-[12px] border-0 bg-transparent px-3 text-left text-sm font-bold text-copy transition hover:bg-muted"
+                        type="button"
+                        onClick={() => {
+                          setOpenWalletActionsId(null);
+                          onTransfer(wallet.id);
+                        }}
+                      >
+                        <ArrowUpRight className="text-faint" size={16} />
+                        Send
+                      </button>
+                      <button
+                        className="flex min-h-10 w-full cursor-pointer items-center gap-3 rounded-[12px] border-0 bg-transparent px-3 text-left text-sm font-bold text-copy transition hover:bg-muted"
+                        type="button"
+                        onClick={() => {
+                          setOpenWalletActionsId(null);
+                          setEditingWallet(wallet);
+                          setEditName(wallet.name);
+                        }}
+                      >
+                        <Pencil className="text-faint" size={16} />
+                        Rename
+                      </button>
+                      <button
+                        className="flex min-h-10 w-full cursor-pointer items-center gap-3 rounded-[12px] border-0 bg-transparent px-3 text-left text-sm font-bold text-danger transition hover:bg-danger/10"
+                        type="button"
+                        onClick={() => {
+                          setOpenWalletActionsId(null);
+                          setDeletingWallet(wallet);
+                        }}
+                      >
+                        <Trash2 size={16} />
+                        Delete
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             ))}
@@ -1474,12 +1489,12 @@ function WalletsPage({
           <section
             aria-labelledby="add-wallet-title"
             aria-modal="true"
-            className="w-full max-w-[480px] rounded-[15px] border border-line bg-surface shadow-[0_18px_50px_rgba(8,8,11,0.32)]"
+            className="w-full max-w-[480px] rounded-[22px] border border-line bg-surface shadow-[0_18px_50px_rgba(8,8,11,0.32)]"
             role="dialog"
           >
             <div className="flex items-start justify-between gap-4 border-b border-line-soft px-5 py-[18px]">
               <div>
-                <h2 className="m-0 text-[17px] font-bold text-ink" id="add-wallet-title">
+                <h2 className="m-0 text-[18px] font-bold text-ink" id="add-wallet-title">
                   Add wallet
                 </h2>
                 <p className="mt-1.5 mb-0 text-xs text-dim">
@@ -1488,7 +1503,7 @@ function WalletsPage({
               </div>
               <button
                 aria-label="Close"
-                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-ink"
+                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[16px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-ink"
                 disabled={actionPending}
                 type="button"
                 onClick={closeAddWallet}
@@ -1502,14 +1517,14 @@ function WalletsPage({
             >
               <div>
                 <label
-                  className="mb-2 block text-[13px] font-semibold text-copy"
+                  className="mb-2 block text-sm font-semibold text-copy"
                   htmlFor="new-wallet-name"
                 >
                   Name
                 </label>
                 <input
                   autoFocus
-                  className="min-h-12 w-full rounded-[9px] border border-line bg-raised px-3.5 text-sm text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15"
+                  className="min-h-12 w-full rounded-[16px] border border-line bg-raised px-4 text-sm text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15"
                   id="new-wallet-name"
                   maxLength={80}
                   placeholder="For example, Primary"
@@ -1519,14 +1534,14 @@ function WalletsPage({
               </div>
               <div>
                 <label
-                  className="mb-2 block text-[13px] font-semibold text-copy"
+                  className="mb-2 block text-sm font-semibold text-copy"
                   htmlFor="new-wallet-key"
                 >
                   Private key
                 </label>
                 <input
                   autoComplete="new-password"
-                  className="min-h-12 w-full rounded-[9px] border border-line bg-raised px-3.5 font-mono text-[13px] text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15"
+                  className="min-h-12 w-full rounded-[16px] border border-line bg-raised px-4 font-mono text-sm text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15"
                   id="new-wallet-key"
                   placeholder="Base58 or JSON array"
                   spellCheck={false}
@@ -1564,12 +1579,12 @@ function WalletsPage({
           <section
             aria-labelledby="edit-wallet-title"
             aria-modal="true"
-            className="w-full max-w-[460px] rounded-[15px] border border-line bg-surface shadow-[0_18px_50px_rgba(8,8,11,0.32)]"
+            className="w-full max-w-[460px] rounded-[22px] border border-line bg-surface shadow-[0_18px_50px_rgba(8,8,11,0.32)]"
             role="dialog"
           >
             <div className="flex items-start justify-between gap-4 border-b border-line-soft px-5 py-[18px]">
               <div>
-                <h2 className="m-0 text-[17px] font-bold text-ink" id="edit-wallet-title">
+                <h2 className="m-0 text-[18px] font-bold text-ink" id="edit-wallet-title">
                   Rename wallet
                 </h2>
                 <p className="mt-1.5 mb-0 text-xs text-dim">
@@ -1578,7 +1593,7 @@ function WalletsPage({
               </div>
               <button
                 aria-label="Close"
-                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-ink"
+                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[16px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-ink"
                 disabled={actionPending}
                 type="button"
                 onClick={() => setEditingWallet(null)}
@@ -1587,15 +1602,12 @@ function WalletsPage({
               </button>
             </div>
             <form className="p-5" onSubmit={(event) => void saveWallet(event)}>
-              <label
-                className="mb-2 block text-[13px] font-semibold text-copy"
-                htmlFor="wallet-name"
-              >
+              <label className="mb-2 block text-sm font-semibold text-copy" htmlFor="wallet-name">
                 Name
               </label>
               <input
                 autoFocus
-                className="min-h-12 w-full rounded-[9px] border border-line bg-raised px-3.5 text-sm text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15"
+                className="min-h-12 w-full rounded-[16px] border border-line bg-raised px-4 text-sm text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15"
                 id="wallet-name"
                 maxLength={80}
                 value={editName}
@@ -1637,16 +1649,16 @@ function WalletsPage({
           <section
             aria-labelledby="delete-wallet-title"
             aria-modal="true"
-            className="w-full max-w-[460px] rounded-[15px] border border-line bg-surface p-5 shadow-[0_18px_50px_rgba(8,8,11,0.32)]"
+            className="w-full max-w-[460px] rounded-[22px] border border-line bg-surface p-5 shadow-[0_18px_50px_rgba(8,8,11,0.32)]"
             role="dialog"
           >
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-[10px] bg-danger/10 text-danger">
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-[16px] bg-danger/10 text-danger">
               <Trash2 size={21} />
             </span>
-            <h2 className="mt-4 mb-0 text-[17px] font-bold text-ink" id="delete-wallet-title">
+            <h2 className="mt-4 mb-0 text-[18px] font-bold text-ink" id="delete-wallet-title">
               Delete {deletingWallet.name}?
             </h2>
-            <p className="mt-2 mb-0 text-[13px] leading-5 text-dim">
+            <p className="mt-2 mb-0 text-sm leading-5 text-dim">
               This entry will be removed from {state.wallet_file}. This action cannot be undone in
               the app.
             </p>
@@ -1672,7 +1684,7 @@ function WalletsPage({
 }
 
 function TransferFieldLabel({ label }: { label: string }) {
-  return <span className="text-[13px] font-bold text-copy">{label}</span>;
+  return <span className="text-sm font-bold text-copy">{label}</span>;
 }
 
 function SingleTransferForm({
@@ -1757,8 +1769,8 @@ function SingleTransferForm({
         title="New transfer"
         subtitle="Set the details — funds move only after confirmation"
       >
-        <form className="flex flex-col gap-3.5" onSubmit={submit}>
-          <div className="flex flex-col gap-2.5">
+        <form className="flex flex-col gap-4" onSubmit={submit}>
+          <div className="flex flex-col gap-3">
             <TransferFieldLabel label="From" />
             <WalletSelect
               detailed
@@ -1773,13 +1785,13 @@ function SingleTransferForm({
             />
           </div>
 
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3 max-[520px]:flex-col max-[520px]:items-stretch">
               <TransferFieldLabel label="To" />
-              <div className="inline-flex shrink-0 rounded-[9px] border border-line bg-raised p-0.5 max-[520px]:w-full">
+              <div className="inline-flex shrink-0 rounded-[16px] border border-line bg-raised p-0.5 max-[520px]:w-full">
                 <button
                   aria-pressed={recipientType === 'wallet'}
-                  className={`inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[7px] border-0 px-3 text-xs font-semibold transition max-[520px]:flex-1 ${recipientType === 'wallet' ? 'bg-primary text-surface' : 'bg-transparent text-dim hover:text-copy'}`}
+                  className={`inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-[12px] border-0 px-4 text-sm font-bold transition max-[520px]:flex-1 ${recipientType === 'wallet' ? 'bg-primary text-surface' : 'bg-transparent text-dim hover:text-copy'}`}
                   type="button"
                   onClick={() => setRecipientType('wallet')}
                 >
@@ -1788,7 +1800,7 @@ function SingleTransferForm({
                 </button>
                 <button
                   aria-pressed={recipientType === 'address'}
-                  className={`inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[7px] border-0 px-3 text-xs font-semibold transition max-[520px]:flex-1 ${recipientType === 'address' ? 'bg-primary text-surface' : 'bg-transparent text-dim hover:text-copy'}`}
+                  className={`inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-[12px] border-0 px-4 text-sm font-bold transition max-[520px]:flex-1 ${recipientType === 'address' ? 'bg-primary text-surface' : 'bg-transparent text-dim hover:text-copy'}`}
                   type="button"
                   onClick={() => setRecipientType('address')}
                 >
@@ -1813,7 +1825,7 @@ function SingleTransferForm({
                   size={17}
                 />
                 <input
-                  className="h-12 w-full rounded-[10px] border border-line bg-raised pr-12 pl-12 font-mono text-sm text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-3 focus:ring-primary/15"
+                  className="h-12 w-full rounded-[16px] border border-line bg-raised pr-12 pl-12 font-mono text-sm text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-3 focus:ring-primary/15"
                   autoComplete="off"
                   placeholder="Solana address"
                   spellCheck={false}
@@ -1822,7 +1834,7 @@ function SingleTransferForm({
                 />
                 <button
                   aria-label="Paste address"
-                  className="absolute top-1/2 right-2.5 inline-flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-[8px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-primary"
+                  className="absolute top-1/2 right-2.5 inline-flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-[16px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-primary"
                   title="Paste address"
                   type="button"
                   onClick={() => {
@@ -1838,11 +1850,11 @@ function SingleTransferForm({
             )}
           </div>
 
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
               <TransferFieldLabel label="Amount" />
               <button
-                className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-line-soft bg-raised px-2.5 py-1 text-[11px] font-medium text-faint transition hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
+                className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-line-soft bg-raised px-3 py-1 text-xs font-medium text-faint transition hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
                 title="Use the maximum available amount"
                 type="button"
                 onClick={() => applyPreset(100)}
@@ -1853,7 +1865,7 @@ function SingleTransferForm({
             </div>
             <div className="relative">
               <input
-                className="h-12 w-full rounded-[10px] border border-line bg-raised px-4 pr-24 text-[22px] leading-none font-semibold text-ink tabular-nums transition outline-none placeholder:text-faint focus:border-primary focus:ring-3 focus:ring-primary/15"
+                className="h-12 w-full rounded-[16px] border border-line bg-raised px-4 pr-24 text-[22px] leading-none font-semibold text-ink tabular-nums transition outline-none placeholder:text-faint focus:border-primary focus:ring-3 focus:ring-primary/15"
                 inputMode="decimal"
                 placeholder="0.00"
                 value={amount}
@@ -1868,28 +1880,28 @@ function SingleTransferForm({
             </div>
             <div className="grid grid-cols-4 gap-2 max-[480px]:grid-cols-2">
               <button
-                className={`min-h-8 cursor-pointer rounded-full border px-3 text-xs font-semibold transition ${selectedPreset === 25 ? 'border-primary/40 bg-primary/15 text-primary' : 'border-line bg-raised text-dim hover:border-line-strong hover:text-copy'}`}
+                className={`min-h-10 cursor-pointer rounded-full border px-4 py-2 text-sm font-bold transition ${selectedPreset === 25 ? 'border-primary/40 bg-primary/15 text-primary' : 'border-line bg-raised text-dim hover:border-line-strong hover:text-copy'}`}
                 type="button"
                 onClick={() => applyPreset(25)}
               >
                 25%
               </button>
               <button
-                className={`min-h-8 cursor-pointer rounded-full border px-3 text-xs font-semibold transition ${selectedPreset === 50 ? 'border-primary/40 bg-primary/15 text-primary' : 'border-line bg-raised text-dim hover:border-line-strong hover:text-copy'}`}
+                className={`min-h-10 cursor-pointer rounded-full border px-4 py-2 text-sm font-bold transition ${selectedPreset === 50 ? 'border-primary/40 bg-primary/15 text-primary' : 'border-line bg-raised text-dim hover:border-line-strong hover:text-copy'}`}
                 type="button"
                 onClick={() => applyPreset(50)}
               >
                 50%
               </button>
               <button
-                className={`min-h-8 cursor-pointer rounded-full border px-3 text-xs font-semibold transition ${selectedPreset === 75 ? 'border-primary/40 bg-primary/15 text-primary' : 'border-line bg-raised text-dim hover:border-line-strong hover:text-copy'}`}
+                className={`min-h-10 cursor-pointer rounded-full border px-4 py-2 text-sm font-bold transition ${selectedPreset === 75 ? 'border-primary/40 bg-primary/15 text-primary' : 'border-line bg-raised text-dim hover:border-line-strong hover:text-copy'}`}
                 type="button"
                 onClick={() => applyPreset(75)}
               >
                 75%
               </button>
               <button
-                className={`min-h-8 cursor-pointer rounded-full border px-3 text-xs font-semibold transition ${selectedPreset === 100 ? 'border-primary/40 bg-primary/15 text-primary' : 'border-line bg-raised text-dim hover:border-line-strong hover:text-copy'}`}
+                className={`min-h-10 cursor-pointer rounded-full border px-4 py-2 text-sm font-bold transition ${selectedPreset === 100 ? 'border-primary/40 bg-primary/15 text-primary' : 'border-line bg-raised text-dim hover:border-line-strong hover:text-copy'}`}
                 type="button"
                 onClick={() => applyPreset(100)}
               >
@@ -1898,8 +1910,8 @@ function SingleTransferForm({
             </div>
           </div>
           {!amountInvalid ? (
-            <div className="grid grid-cols-3 overflow-hidden rounded-[10px] border border-line-soft bg-app/40 max-[520px]:grid-cols-1">
-              <div className="px-3 py-2.5 max-[520px]:flex max-[520px]:items-center max-[520px]:justify-between">
+            <div className="grid grid-cols-3 overflow-hidden rounded-[16px] border border-line-soft bg-app/40 max-[520px]:grid-cols-1">
+              <div className="px-3 py-3 max-[520px]:flex max-[520px]:items-center max-[520px]:justify-between">
                 <span className="block text-[10px] font-semibold tracking-[0.05em] text-faint uppercase">
                   Amount
                 </span>
@@ -1907,7 +1919,7 @@ function SingleTransferForm({
                   {formatSol(amountNumber)} SOL
                 </strong>
               </div>
-              <div className="border-x border-line-soft px-3 py-2.5 max-[520px]:flex max-[520px]:items-center max-[520px]:justify-between max-[520px]:border-x-0 max-[520px]:border-y">
+              <div className="border-x border-line-soft px-3 py-3 max-[520px]:flex max-[520px]:items-center max-[520px]:justify-between max-[520px]:border-x-0 max-[520px]:border-y">
                 <span className="block text-[10px] font-semibold tracking-[0.05em] text-faint uppercase">
                   Est. fee
                 </span>
@@ -1915,7 +1927,7 @@ function SingleTransferForm({
                   {formatSol(estimatedTransferFee)} SOL
                 </strong>
               </div>
-              <div className="px-3 py-2.5 max-[520px]:flex max-[520px]:items-center max-[520px]:justify-between">
+              <div className="px-3 py-3 max-[520px]:flex max-[520px]:items-center max-[520px]:justify-between">
                 <span className="block text-[10px] font-semibold tracking-[0.05em] text-faint uppercase">
                   Est. debit
                 </span>
@@ -2099,7 +2111,7 @@ function BatchOperationForm({
               <TransferFieldLabel label="Amount per recipient" />
               <div className="relative mt-2">
                 <input
-                  className="h-12 w-full rounded-[10px] border border-line bg-raised px-4 pr-20 text-[22px] leading-none font-semibold text-ink tabular-nums transition outline-none placeholder:text-faint focus:border-primary focus:ring-3 focus:ring-primary/15"
+                  className="h-12 w-full rounded-[16px] border border-line bg-raised px-4 pr-20 text-[22px] leading-none font-semibold text-ink tabular-nums transition outline-none placeholder:text-faint focus:border-primary focus:ring-3 focus:ring-primary/15"
                   inputMode="decimal"
                   placeholder="0.00"
                   value={amount}
@@ -2109,7 +2121,7 @@ function BatchOperationForm({
                   SOL
                 </span>
               </div>
-              <p className="mt-2 mb-0 text-[11px] leading-relaxed text-faint">
+              <p className="mt-2 mb-0 text-xs leading-relaxed text-faint">
                 This amount will be sent to each selected recipient
               </p>
             </div>
@@ -2132,13 +2144,13 @@ function BatchOperationForm({
             <div>
               <div className="flex items-center justify-between gap-3">
                 <TransferFieldLabel label="Amount from each" />
-                <span className="rounded-full bg-soft px-2.5 py-1 text-[11px] font-medium text-faint max-[420px]:hidden">
+                <span className="rounded-full bg-soft px-3 py-1 text-xs font-medium text-faint max-[420px]:hidden">
                   Enter SOL or %
                 </span>
               </div>
               <div className="relative mt-2">
                 <input
-                  className="h-12 w-full rounded-[10px] border border-line bg-raised px-4 pr-20 text-[22px] leading-none font-semibold text-ink tabular-nums transition outline-none placeholder:text-faint focus:border-primary focus:ring-3 focus:ring-primary/15"
+                  className="h-12 w-full rounded-[16px] border border-line bg-raised px-4 pr-20 text-[22px] leading-none font-semibold text-ink tabular-nums transition outline-none placeholder:text-faint focus:border-primary focus:ring-3 focus:ring-primary/15"
                   inputMode="decimal"
                   placeholder="100%"
                   value={amount}
@@ -2172,12 +2184,12 @@ function BatchOperationForm({
         {mode === 'equalize' ? (
           <div>
             <TransferFieldLabel label="Calculated result" />
-            <div className="mt-2 flex min-h-[126px] items-center gap-3 rounded-[11px] border border-line-soft bg-raised/60 p-4">
-              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] bg-primary/15 text-primary">
+            <div className="mt-2 flex min-h-[126px] items-center gap-3 rounded-[18px] border border-line-soft bg-raised/60 p-4">
+              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] bg-primary/15 text-primary">
                 <WalletCards size={21} />
               </span>
               <div className="min-w-0">
-                <strong className="block text-[13px] font-semibold text-copy">
+                <strong className="block text-sm font-semibold text-copy">
                   Equal share for each wallet
                 </strong>
                 <small className="mt-1 block text-xs leading-relaxed text-faint">
@@ -2189,10 +2201,10 @@ function BatchOperationForm({
         ) : null}
         <div className="mt-auto pt-5">
           {showSummary ? (
-            <div className="grid grid-cols-2 overflow-hidden rounded-[10px] border border-line-soft bg-app/40">
+            <div className="grid grid-cols-2 overflow-hidden rounded-[16px] border border-line-soft bg-app/40">
               {summaryItems.map((item, index) => (
                 <div
-                  className={`px-3 py-2.5 ${
+                  className={`px-3 py-3 ${
                     index === 1
                       ? 'border-l border-line-soft'
                       : index === 2
@@ -2281,14 +2293,14 @@ function OperationModeTab({
   return (
     <button
       aria-pressed={active}
-      className={`flex min-h-[68px] w-full cursor-pointer items-center justify-start gap-3 rounded-[8px] border px-3.5 text-left transition focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none ${active ? 'border-primary/30 bg-primary/15 text-primary' : 'border-transparent bg-transparent text-dim hover:bg-raised hover:text-copy'}`}
+      className={`flex min-h-[72px] w-full cursor-pointer items-center justify-start gap-4 rounded-[16px] border px-4 py-3 text-left transition focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none ${active ? 'border-primary/30 bg-primary/15 text-primary' : 'border-transparent bg-transparent text-dim hover:bg-raised hover:text-copy'}`}
       type="button"
       onClick={onClick}
     >
       <Icon className="shrink-0" size={22} />
       <span className="min-w-0">
-        <strong className="block text-sm font-semibold">{label}</strong>
-        <small className="mt-0.5 block text-[13px] opacity-75">{description}</small>
+        <strong className="block text-[16px] font-bold">{label}</strong>
+        <small className="mt-0.5 block text-sm opacity-75">{description}</small>
       </span>
     </button>
   );
@@ -2311,11 +2323,23 @@ function OperationsPage({
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Operations" description="Route SOL across local and external accounts" />
-      <div className="grid grid-cols-[250px_minmax(0,1fr)] items-start gap-4 max-[1180px]:grid-cols-1">
+      <PageHeader title="Operations" />
+      <div className="grid grid-cols-[minmax(0,900px)_280px] items-start gap-4 max-[1280px]:grid-cols-1">
+        <div className={`min-w-0 ${mode === 'single' ? 'max-w-[900px]' : ''}`}>
+          {mode === 'single' ? (
+            <SingleTransferForm
+              initialSourceId={initialSourceId}
+              state={state}
+              onPreview={onPreview}
+              onToast={onToast}
+            />
+          ) : (
+            <BatchOperationForm mode={mode} state={state} onPreview={onPreview} />
+          )}
+        </div>
         <div
           aria-label="Operation type"
-          className="grid grid-cols-1 gap-1 rounded-[11px] border border-line-soft bg-surface p-1.5 max-[1180px]:grid-cols-4 max-[760px]:grid-cols-2"
+          className="grid grid-cols-1 gap-1 rounded-[18px] border border-line-soft bg-surface p-1.5 max-[1280px]:grid-cols-4 max-[760px]:grid-cols-2"
           role="group"
         >
           <OperationModeTab
@@ -2346,18 +2370,6 @@ function OperationsPage({
             label="Equalize"
             onClick={() => onModeChange('equalize')}
           />
-        </div>
-        <div className={`min-w-0 ${mode === 'single' ? 'max-w-[900px]' : ''}`}>
-          {mode === 'single' ? (
-            <SingleTransferForm
-              initialSourceId={initialSourceId}
-              state={state}
-              onPreview={onPreview}
-              onToast={onToast}
-            />
-          ) : (
-            <BatchOperationForm mode={mode} state={state} onPreview={onPreview} />
-          )}
         </div>
       </div>
     </div>
@@ -2482,212 +2494,216 @@ function ActivityPage({ state }: { state: WalletState }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Activity" description="Transactions and local application events" />
+      <PageHeader title="Activity" />
       {error ? <ErrorBanner message={error} onRetry={() => void load()} /> : null}
-      <Panel className="p-3.5">
-        <div className="flex flex-wrap items-center gap-3">
-          <label className="flex h-11 min-w-[240px] flex-1 items-center gap-2 rounded-[9px] border border-line bg-raised px-3 text-dim transition focus-within:border-primary/70 focus-within:text-copy">
-            <Search aria-hidden="true" size={16} />
-            <input
-              aria-label="Search activity"
-              className="min-w-0 flex-1 border-0 bg-transparent text-[13px] text-ink outline-none placeholder:text-faint"
-              placeholder="Event, address, or signature…"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-            {query ? (
-              <button
-                aria-label="Clear search"
-                className="cursor-pointer border-0 bg-transparent p-0 text-faint hover:text-copy"
-                type="button"
-                onClick={() => setQuery('')}
-              >
-                <X size={15} />
-              </button>
-            ) : null}
-          </label>
-          <div
-            aria-label="Activity filter"
-            className="inline-flex h-11 shrink-0 flex-wrap gap-1 rounded-[10px] border border-line-soft bg-surface p-1"
-            role="group"
-          >
-            {(
-              [
-                ['transactions', 'Transactions'],
-                ['errors', 'Errors'],
-                ['all', 'All events'],
-              ] as const
-            ).map(([value, label]) => (
-              <button
-                className={`inline-flex h-full cursor-pointer items-center gap-2 rounded-[7px] border-0 px-3 text-xs font-semibold transition ${view === value ? 'bg-primary text-surface' : 'bg-transparent text-dim hover:bg-raised hover:text-copy'}`}
-                key={value}
-                type="button"
-                onClick={() => setView(value)}
-              >
-                <span>{label}</span>
-                <b
-                  className={`inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-xs ${view === value ? 'bg-surface/20' : 'bg-soft text-faint'}`}
+      <div className="grid grid-cols-1 items-start gap-4 min-[1281px]:grid-cols-[minmax(0,1fr)_280px]">
+        <Panel className="p-4 min-[1281px]:col-start-2 min-[1281px]:row-start-1">
+          <div className="flex flex-wrap items-center gap-3 min-[1281px]:flex-col min-[1281px]:items-stretch">
+            <label className="flex h-14 min-w-[240px] flex-1 items-center gap-2 rounded-[16px] border border-line bg-raised px-3 text-dim transition focus-within:border-primary/70 focus-within:text-copy min-[1281px]:w-full min-[1281px]:min-w-0">
+              <Search aria-hidden="true" size={16} />
+              <input
+                aria-label="Search activity"
+                className="min-w-0 flex-1 border-0 bg-transparent text-sm text-ink outline-none placeholder:text-faint"
+                placeholder="Event, address, or signature…"
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
+              {query ? (
+                <button
+                  aria-label="Clear search"
+                  className="cursor-pointer border-0 bg-transparent p-0 text-faint hover:text-copy"
+                  type="button"
+                  onClick={() => setQuery('')}
                 >
-                  {counts[value]}
-                </b>
-              </button>
-            ))}
-          </div>
-          <Button
-            aria-label="Export"
-            className="h-11"
-            compact
-            disabled={!filteredEntries.length}
-            icon={Download}
-            onClick={exportEntries}
-          >
-            <span className="max-[1180px]:sr-only">Export</span>
-          </Button>
-        </div>
-      </Panel>
-      <div className="relative overflow-hidden rounded-[11px] border border-line-soft bg-surface">
-        {filteredEntries.length ? (
-          <div>
-            <div className="grid h-10 grid-cols-[52px_minmax(280px,1fr)_170px_84px] items-center gap-4 rounded-t-[10px] bg-muted/65 px-5 text-xs font-semibold tracking-[0.06em] text-faint uppercase max-[1180px]:grid-cols-[44px_minmax(240px,1fr)_140px_72px] max-[900px]:hidden">
-              <span />
-              <span>Event</span>
-              <span>Date and time</span>
-              <span />
+                  <X size={15} />
+                </button>
+              ) : null}
+            </label>
+            <div
+              aria-label="Activity filter"
+              className="inline-flex h-10 shrink-0 flex-wrap gap-1 rounded-[16px] border border-line-soft bg-surface p-1 min-[1281px]:h-auto min-[1281px]:w-full min-[1281px]:flex-col"
+              role="group"
+            >
+              {(
+                [
+                  ['transactions', 'Transactions'],
+                  ['errors', 'Errors'],
+                  ['all', 'All events'],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  className={`inline-flex h-full cursor-pointer items-center gap-3 rounded-[12px] border-0 px-4 text-sm font-bold transition min-[1281px]:h-10 min-[1281px]:justify-between ${view === value ? 'bg-primary text-surface' : 'bg-transparent text-dim hover:bg-raised hover:text-copy'}`}
+                  key={value}
+                  type="button"
+                  onClick={() => setView(value)}
+                >
+                  <span>{label}</span>
+                  <b
+                    className={`inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-xs ${view === value ? 'bg-surface/20' : 'bg-soft text-faint'}`}
+                  >
+                    {counts[value]}
+                  </b>
+                </button>
+              ))}
             </div>
-            {filteredEntries.map((entry) => {
-              const expanded = expandedId === entry.id;
-              return (
-                <article
-                  className={`relative border-t border-line-soft px-5 transition hover:z-20 hover:bg-muted/40 ${
-                    expanded ? 'bg-muted/20 pt-3 pb-4' : 'py-2'
-                  }`}
-                  key={entry.id}
-                >
-                  <div className="grid min-h-14 grid-cols-[52px_minmax(280px,1fr)_170px_84px] items-center gap-4 max-[1180px]:grid-cols-[44px_minmax(240px,1fr)_140px_72px] max-[900px]:grid-cols-[36px_minmax(0,1fr)_auto] max-[900px]:gap-2">
-                    <span
-                      className={`inline-flex h-9 w-9 items-center justify-center rounded-[9px] ${entry.tone === 'success' ? 'bg-primary/15 text-primary' : entry.tone === 'error' ? 'bg-danger/10 text-danger' : 'bg-soft text-dim'}`}
-                    >
-                      {entry.status === 'submitted' ? (
-                        <LoaderCircle className="animate-spin" size={17} />
-                      ) : entry.tone === 'success' ? (
-                        <CheckCircle2 size={17} />
-                      ) : entry.tone === 'error' ? (
-                        <TriangleAlert size={17} />
-                      ) : (
-                        <Activity size={17} />
-                      )}
-                    </span>
-                    <div className="min-w-0">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <strong className="truncate text-sm font-semibold text-copy">
-                          {entry.title}
-                        </strong>
-                        {(entry.occurrences ?? 1) > 1 ? (
-                          <span className="shrink-0 rounded-full bg-soft px-2 py-0.5 text-[10px] font-semibold text-faint">
-                            ×{entry.occurrences}
-                          </span>
-                        ) : null}
-                      </div>
-                      <p className="mt-1 mb-0 truncate text-xs leading-relaxed text-dim">
-                        {entry.message}
-                      </p>
-                      <small className="mt-1 hidden text-[11px] text-faint max-[900px]:block">
-                        {formatActivityTime(entry.timestamp)}
-                      </small>
-                    </div>
-                    <time
-                      className="text-[13px] whitespace-nowrap text-faint tabular-nums max-[900px]:hidden"
-                      dateTime={entry.timestamp}
-                    >
-                      {formatActivityTime(entry.timestamp)}
-                    </time>
-                    <div className="flex items-center gap-1 justify-self-start">
-                      {entry.signature ? (
-                        <a
-                          aria-label="Open transaction in Solscan"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-[9px] border border-transparent text-faint transition hover:border-line hover:bg-muted hover:text-copy"
-                          href={explorerUrl(entry.signature)}
-                          rel="noreferrer"
-                          target="_blank"
-                          title="Open in Solscan"
-                        >
-                          <ExternalLink size={15} />
-                        </a>
-                      ) : null}
-                      <button
-                        aria-expanded={expanded}
-                        aria-label={expanded ? 'Hide details' : 'Show details'}
-                        className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border border-transparent bg-transparent text-faint transition hover:border-line hover:bg-muted hover:text-copy"
-                        type="button"
-                        onClick={() => setExpandedId(expanded ? null : entry.id)}
+            <Button
+              aria-label="Export"
+              className="h-11 min-[1281px]:w-full"
+              compact
+              disabled={!filteredEntries.length}
+              icon={Download}
+              onClick={exportEntries}
+            >
+              <span>Export</span>
+            </Button>
+          </div>
+        </Panel>
+        <div className="relative overflow-hidden rounded-[18px] border border-line-soft bg-surface min-[1281px]:col-start-1 min-[1281px]:row-start-1">
+          {filteredEntries.length ? (
+            <div>
+              <div className="grid h-10 grid-cols-[52px_minmax(280px,1fr)_170px_84px] items-center gap-4 rounded-t-[10px] bg-muted/65 px-5 text-xs font-semibold tracking-[0.06em] text-faint uppercase max-[1180px]:grid-cols-[44px_minmax(240px,1fr)_140px_72px] max-[900px]:hidden">
+                <span />
+                <span>Event</span>
+                <span>Date and time</span>
+                <span />
+              </div>
+              {filteredEntries.map((entry) => {
+                const expanded = expandedId === entry.id;
+                return (
+                  <article
+                    className={`relative border-t border-line-soft px-5 transition hover:z-20 hover:bg-muted/40 ${
+                      expanded ? 'bg-muted/20 pt-3 pb-4' : 'py-2'
+                    }`}
+                    key={entry.id}
+                  >
+                    <div className="grid min-h-14 grid-cols-[52px_minmax(280px,1fr)_170px_84px] items-center gap-4 max-[1180px]:grid-cols-[44px_minmax(240px,1fr)_140px_72px] max-[900px]:grid-cols-[36px_minmax(0,1fr)_auto] max-[900px]:gap-2">
+                      <span
+                        className={`inline-flex h-9 w-9 items-center justify-center rounded-[16px] ${entry.tone === 'success' ? 'bg-primary/15 text-primary' : entry.tone === 'error' ? 'bg-danger/10 text-danger' : 'bg-soft text-dim'}`}
                       >
-                        {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                      </button>
-                    </div>
-                  </div>
-                  {expanded ? (
-                    <div className="mt-3 ml-[68px] rounded-[10px] border border-line-soft bg-app/55 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.015)] max-[900px]:ml-0">
-                      <div className="mb-3 flex items-center justify-between gap-3 border-b border-line-soft pb-3">
-                        <strong className="text-xs font-semibold text-copy">Event details</strong>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] text-faint">
-                            {formatActivityTime(entry.timestamp)}
-                          </span>
-                          <Button
-                            compact
-                            icon={copiedId === entry.id ? Check : Copy}
-                            onClick={() => void copyEntry(entry)}
-                          >
-                            {copiedId === entry.id ? 'Copied' : 'Copy'}
-                          </Button>
+                        {entry.status === 'submitted' ? (
+                          <LoaderCircle className="animate-spin" size={17} />
+                        ) : entry.tone === 'success' ? (
+                          <CheckCircle2 size={17} />
+                        ) : entry.tone === 'error' ? (
+                          <TriangleAlert size={17} />
+                        ) : (
+                          <Activity size={17} />
+                        )}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <strong className="truncate text-sm font-semibold text-copy">
+                            {entry.title}
+                          </strong>
+                          {(entry.occurrences ?? 1) > 1 ? (
+                            <span className="shrink-0 rounded-full bg-soft px-2 py-0.5 text-[10px] font-semibold text-faint">
+                              ×{entry.occurrences}
+                            </span>
+                          ) : null}
                         </div>
+                        <p className="mt-1 mb-0 truncate text-xs leading-relaxed text-dim">
+                          {entry.message}
+                        </p>
+                        <small className="mt-1 hidden text-xs text-faint max-[900px]:block">
+                          {formatActivityTime(entry.timestamp)}
+                        </small>
                       </div>
-                      <dl className="m-0 grid grid-cols-[120px_minmax(0,1fr)] gap-x-5 gap-y-3 text-xs leading-relaxed max-[540px]:grid-cols-1 max-[540px]:gap-y-1">
-                        <dt className="font-medium text-faint">Message</dt>
-                        <dd className="m-0 break-words text-copy">{entry.message}</dd>
-                        {entry.status ? (
-                          <>
-                            <dt className="font-medium text-faint max-[540px]:mt-2">Status</dt>
-                            <dd className="m-0 text-copy">
-                              {transactionStatusLabel(entry.status)}
-                            </dd>
-                          </>
-                        ) : null}
+                      <time
+                        className="text-sm whitespace-nowrap text-faint tabular-nums max-[900px]:hidden"
+                        dateTime={entry.timestamp}
+                      >
+                        {formatActivityTime(entry.timestamp)}
+                      </time>
+                      <div className="flex items-center gap-1 justify-self-start">
                         {entry.signature ? (
-                          <>
-                            <dt className="font-medium text-faint max-[540px]:mt-2">Signature</dt>
-                            <dd className="m-0 font-mono break-all text-copy">{entry.signature}</dd>
-                          </>
+                          <a
+                            aria-label="Open transaction in Solscan"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-[16px] border border-transparent text-faint transition hover:border-line hover:bg-muted hover:text-copy"
+                            href={explorerUrl(entry.signature)}
+                            rel="noreferrer"
+                            target="_blank"
+                            title="Open in Solscan"
+                          >
+                            <ExternalLink size={15} />
+                          </a>
                         ) : null}
-                        {entry.error ? (
-                          <>
-                            <dt className="font-medium text-faint max-[540px]:mt-2">Error</dt>
-                            <dd className="m-0 break-words text-danger">{entry.error}</dd>
-                          </>
-                        ) : null}
-                      </dl>
+                        <button
+                          aria-expanded={expanded}
+                          aria-label={expanded ? 'Hide details' : 'Show details'}
+                          className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[16px] border border-transparent bg-transparent text-faint transition hover:border-line hover:bg-muted hover:text-copy"
+                          type="button"
+                          onClick={() => setExpandedId(expanded ? null : entry.id)}
+                        >
+                          {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                        </button>
+                      </div>
                     </div>
-                  ) : null}
-                </article>
-              );
-            })}
-          </div>
-        ) : loading ? (
-          <div className="flex min-h-[240px] items-center justify-center gap-3 text-[13px] text-dim">
-            <LoaderCircle className="animate-spin" size={24} /> Loading activity…
-          </div>
-        ) : (
-          <EmptyState
-            icon={Activity}
-            text={
-              entries.length
-                ? 'Change the filters or search query.'
-                : 'Submitted transactions and application events will appear here.'
-            }
-            title={entries.length ? 'Nothing found' : 'No activity yet'}
-          />
-        )}
+                    {expanded ? (
+                      <div className="mt-3 ml-[68px] rounded-[16px] border border-line-soft bg-app/55 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.015)] max-[900px]:ml-0">
+                        <div className="mb-3 flex items-center justify-between gap-3 border-b border-line-soft pb-3">
+                          <strong className="text-xs font-semibold text-copy">Event details</strong>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-faint">
+                              {formatActivityTime(entry.timestamp)}
+                            </span>
+                            <Button
+                              compact
+                              icon={copiedId === entry.id ? Check : Copy}
+                              onClick={() => void copyEntry(entry)}
+                            >
+                              {copiedId === entry.id ? 'Copied' : 'Copy'}
+                            </Button>
+                          </div>
+                        </div>
+                        <dl className="m-0 grid grid-cols-[120px_minmax(0,1fr)] gap-x-5 gap-y-3 text-xs leading-relaxed max-[540px]:grid-cols-1 max-[540px]:gap-y-1">
+                          <dt className="font-medium text-faint">Message</dt>
+                          <dd className="m-0 break-words text-copy">{entry.message}</dd>
+                          {entry.status ? (
+                            <>
+                              <dt className="font-medium text-faint max-[540px]:mt-2">Status</dt>
+                              <dd className="m-0 text-copy">
+                                {transactionStatusLabel(entry.status)}
+                              </dd>
+                            </>
+                          ) : null}
+                          {entry.signature ? (
+                            <>
+                              <dt className="font-medium text-faint max-[540px]:mt-2">Signature</dt>
+                              <dd className="m-0 font-mono break-all text-copy">
+                                {entry.signature}
+                              </dd>
+                            </>
+                          ) : null}
+                          {entry.error ? (
+                            <>
+                              <dt className="font-medium text-faint max-[540px]:mt-2">Error</dt>
+                              <dd className="m-0 break-words text-danger">{entry.error}</dd>
+                            </>
+                          ) : null}
+                        </dl>
+                      </div>
+                    ) : null}
+                  </article>
+                );
+              })}
+            </div>
+          ) : loading ? (
+            <div className="flex min-h-[240px] items-center justify-center gap-3 text-sm text-dim">
+              <LoaderCircle className="animate-spin" size={24} /> Loading activity…
+            </div>
+          ) : (
+            <EmptyState
+              icon={Activity}
+              text={
+                entries.length
+                  ? 'Change the filters or search query.'
+                  : 'Submitted transactions and application events will appear here.'
+              }
+              title={entries.length ? 'Nothing found' : 'No activity yet'}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -2831,15 +2847,15 @@ function SettingsPage({
 
   return (
     <div className="flex max-w-[1180px] flex-col gap-4">
-      <PageHeader title="Settings" description="Network and local wallet storage" />
+      <PageHeader title="Settings" />
       <div className="grid grid-cols-2 items-start gap-3 max-[980px]:grid-cols-1">
         <Panel compact title="RPC connection">
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-3">
             <div
-              className={`grid gap-2.5 max-[560px]:grid-cols-1 ${rpcPresetMode === 'custom' ? 'grid-cols-[140px_minmax(0,1fr)]' : 'grid-cols-1'}`}
+              className={`grid gap-3 max-[560px]:grid-cols-1 ${rpcPresetMode === 'custom' ? 'grid-cols-[140px_minmax(0,1fr)]' : 'grid-cols-1'}`}
             >
               <div
-                className={`flex flex-col gap-1.5 text-[13px] font-semibold text-copy ${rpcPresetMode === 'custom' ? '' : 'max-w-[240px]'}`}
+                className={`flex flex-col gap-1.5 text-sm font-semibold text-copy ${rpcPresetMode === 'custom' ? '' : 'max-w-[240px]'}`}
               >
                 <span>Network</span>
                 <AppSelect
@@ -2867,10 +2883,10 @@ function SettingsPage({
                 />
               </div>
               {rpcPresetMode === 'custom' ? (
-                <label className="flex flex-col gap-1.5 text-[13px] font-semibold text-copy">
+                <label className="flex flex-col gap-1.5 text-sm font-semibold text-copy">
                   HTTP(S) endpoint
                   <input
-                    className="min-h-10 w-full rounded-[9px] border border-line bg-raised px-3.5 text-[13px] font-normal text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15"
+                    className="min-h-10 w-full rounded-[16px] border border-line bg-raised px-4 text-sm font-normal text-ink transition outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15"
                     spellCheck={false}
                     value={rpcDraft}
                     onChange={(event) => {
@@ -2929,7 +2945,7 @@ function SettingsPage({
               <button
                 aria-expanded={fileMenuOpen}
                 aria-label="Manage files"
-                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border border-line bg-raised text-faint transition hover:border-line-strong hover:bg-muted hover:text-copy"
+                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[16px] border border-line bg-raised text-faint transition hover:border-line-strong hover:bg-muted hover:text-copy"
                 disabled={filePending}
                 type="button"
                 onClick={() => setFileMenuOpen((value) => !value)}
@@ -2937,9 +2953,9 @@ function SettingsPage({
                 <EllipsisVertical size={18} />
               </button>
               {fileMenuOpen ? (
-                <div className="absolute top-[calc(100%+6px)] right-0 z-40 w-[190px] rounded-[10px] border border-line bg-raised p-1.5 shadow-[0_16px_42px_rgba(0,0,0,0.38)]">
+                <div className="absolute top-[calc(100%+6px)] right-0 z-40 w-[190px] rounded-[16px] border border-line bg-raised p-1.5 shadow-[0_16px_42px_rgba(0,0,0,0.38)]">
                   <button
-                    className="flex min-h-9 w-full cursor-pointer items-center gap-2.5 rounded-[7px] border-0 bg-transparent px-2.5 text-left text-[13px] font-medium text-copy transition hover:bg-muted"
+                    className="flex min-h-10 w-full cursor-pointer items-center gap-3 rounded-[12px] border-0 bg-transparent px-3 text-left text-sm font-bold text-copy transition hover:bg-muted"
                     type="button"
                     onClick={() => {
                       setFileMenuOpen(false);
@@ -2950,7 +2966,7 @@ function SettingsPage({
                     Create file
                   </button>
                   <button
-                    className="flex min-h-9 w-full cursor-pointer items-center gap-2.5 rounded-[7px] border-0 bg-transparent px-2.5 text-left text-[13px] font-medium text-copy transition hover:bg-muted"
+                    className="flex min-h-10 w-full cursor-pointer items-center gap-3 rounded-[12px] border-0 bg-transparent px-3 text-left text-sm font-bold text-copy transition hover:bg-muted"
                     type="button"
                     onClick={() => {
                       setFileMenuOpen(false);
@@ -2966,7 +2982,7 @@ function SettingsPage({
           }
         >
           <div className="flex flex-col gap-1.5">
-            <label className="text-[13px] font-semibold text-copy">Active file</label>
+            <label className="text-sm font-semibold text-copy">Active file</label>
             <AppSelect
               ariaLabel="Select active wallet file"
               disabled={filePending}
@@ -2987,7 +3003,7 @@ function SettingsPage({
               </div>
             ) : null}
             {state.warnings.length ? (
-              <div className="mt-1.5 flex items-start gap-2 rounded-[8px] border border-danger/25 bg-danger/10 px-2.5 py-2 text-xs leading-relaxed text-danger">
+              <div className="mt-1.5 flex items-start gap-2 rounded-[16px] border border-danger/25 bg-danger/10 px-3 py-2 text-xs leading-relaxed text-danger">
                 <TriangleAlert className="mt-0.5 shrink-0" size={15} />
                 <span>
                   {state.warnings[0]}
@@ -2995,7 +3011,7 @@ function SettingsPage({
                 </span>
               </div>
             ) : null}
-            <div className="mt-1.5 flex items-start gap-2 rounded-[8px] border border-warning/25 bg-warning/10 px-2.5 py-2 text-xs leading-relaxed text-warning">
+            <div className="mt-1.5 flex items-start gap-2 rounded-[16px] border border-warning/25 bg-warning/10 px-3 py-2 text-xs leading-relaxed text-warning">
               <TriangleAlert className="mt-0.5 shrink-0" size={15} />
               <span>
                 The CSV contains private keys and is stored locally without encryption. Never share
@@ -3016,12 +3032,12 @@ function SettingsPage({
           <section
             aria-labelledby="create-wallet-file-title"
             aria-modal="true"
-            className="w-full max-w-[440px] rounded-[15px] border border-line bg-surface shadow-[0_18px_50px_rgba(8,8,11,0.32)]"
+            className="w-full max-w-[440px] rounded-[22px] border border-line bg-surface shadow-[0_18px_50px_rgba(8,8,11,0.32)]"
             role="dialog"
           >
             <div className="flex items-start justify-between gap-4 border-b border-line-soft px-5 py-[18px]">
               <div>
-                <h2 className="m-0 text-[17px] font-bold text-ink" id="create-wallet-file-title">
+                <h2 className="m-0 text-[18px] font-bold text-ink" id="create-wallet-file-title">
                   Create wallet file
                 </h2>
                 <p className="mt-1.5 mb-0 text-xs text-dim">
@@ -3030,7 +3046,7 @@ function SettingsPage({
               </div>
               <button
                 aria-label="Close"
-                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[9px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-ink"
+                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[16px] border-0 bg-transparent text-faint transition hover:bg-muted hover:text-ink"
                 disabled={filePending}
                 type="button"
                 onClick={() => setNewFileOpen(false)}
@@ -3040,15 +3056,15 @@ function SettingsPage({
             </div>
             <form className="p-5" onSubmit={(event) => void createFile(event)}>
               <label
-                className="mb-2 block text-[13px] font-semibold text-copy"
+                className="mb-2 block text-sm font-semibold text-copy"
                 htmlFor="new-wallet-file-name"
               >
                 Name
               </label>
-              <div className="flex min-h-12 items-center rounded-[9px] border border-line bg-raised transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15">
+              <div className="flex min-h-12 items-center rounded-[16px] border border-line bg-raised transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15">
                 <input
                   autoFocus
-                  className="min-w-0 flex-1 border-0 bg-transparent px-3.5 text-sm text-ink outline-none placeholder:text-faint"
+                  className="min-w-0 flex-1 border-0 bg-transparent px-4 text-sm text-ink outline-none placeholder:text-faint"
                   id="new-wallet-file-name"
                   maxLength={80}
                   placeholder="For example, trading"
@@ -3080,120 +3096,82 @@ function SettingsPage({
   );
 }
 
-function SidebarNavItem({
+function BottomNavItem({
   active,
-  collapsed,
   item: { id, label, icon: Icon },
   onNavigate,
 }: {
   active: boolean;
-  collapsed: boolean;
   item: (typeof navItems)[number];
   onNavigate: (page: PageId) => void;
 }) {
   return (
-    <div className="group/sidebar-item relative">
-      <button
-        aria-current={active ? 'page' : undefined}
-        className={`relative flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-[3px] border-0 px-1.5 text-left transition focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:ring-inset ${active ? 'bg-primary/15 text-primary' : 'text-dim hover:bg-raised hover:text-copy'} ${collapsed ? 'justify-center' : ''} max-[900px]:justify-center`}
-        type="button"
-        onClick={() => onNavigate(id)}
-      >
-        {active ? (
-          <i className="absolute top-1/2 left-0 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-primary" />
-        ) : null}
-        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center">
-          <Icon size={19} />
-        </span>
-        <b
-          className={`${collapsed ? 'hidden' : 'block'} min-w-0 flex-1 overflow-hidden text-[13px] font-semibold text-ellipsis whitespace-nowrap max-[900px]:hidden`}
-        >
-          {label}
-        </b>
-      </button>
-      <span
-        className={`${collapsed ? 'group-focus-within/sidebar-item:flex group-hover/sidebar-item:flex' : 'hidden max-[900px]:group-focus-within/sidebar-item:flex max-[900px]:group-hover/sidebar-item:flex'} pointer-events-none absolute top-1/2 left-[calc(100%+10px)] z-50 hidden -translate-y-1/2 items-center rounded-[7px] border border-line bg-raised px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap text-copy shadow-[0_10px_30px_rgba(0,0,0,0.32)]`}
-        role="tooltip"
-      >
+    <button
+      aria-current={active ? 'page' : undefined}
+      aria-label={label}
+      className={`liquid-nav-item group relative flex min-h-12 min-w-[58px] cursor-pointer items-center justify-center gap-1.5 overflow-hidden rounded-[18px] border-0 px-4 text-left focus-visible:ring-2 focus-visible:ring-primary/55 focus-visible:outline-none max-[620px]:min-w-[48px] max-[620px]:px-3 ${active ? 'is-active text-primary' : 'text-dim hover:text-copy'}`}
+      type="button"
+      onClick={() => onNavigate(id)}
+    >
+      {active ? <span aria-hidden="true" className="liquid-nav-active" /> : null}
+      <span className="liquid-nav-icon relative z-10 inline-flex h-8 w-8 shrink-0 items-center justify-center">
+        <Icon strokeWidth={active ? 2.35 : 1.9} size={20} />
+      </span>
+      <span className="liquid-nav-label relative z-10 text-[14px] font-bold whitespace-nowrap max-[880px]:hidden">
         {label}
       </span>
-    </div>
+    </button>
   );
 }
 
-function Sidebar({
+function BottomNav({
   activePage,
-  collapsed,
-  onCollapse,
   onNavigate,
 }: {
   activePage: PageId;
-  collapsed: boolean;
-  onCollapse: () => void;
   onNavigate: (page: PageId) => void;
 }) {
   return (
-    <aside
-      className={`sticky top-0 z-30 flex h-screen flex-col overflow-visible border-r border-line-soft bg-sidebar px-3 py-4 transition-[width] duration-200 ${collapsed ? 'w-[72px]' : 'w-[248px]'} max-[900px]:w-[72px]`}
-    >
-      <div
-        className={`flex min-h-12 items-center gap-2 ${collapsed ? 'justify-center' : 'justify-between'} max-[900px]:justify-center`}
+    <div className="pointer-events-none fixed right-0 bottom-0 left-0 z-[100] px-3 pb-[max(14px,env(safe-area-inset-bottom))]">
+      <nav
+        aria-label="Main navigation"
+        className="liquid-glass-bar pointer-events-auto mx-auto flex w-fit max-w-full items-center gap-1 rounded-[30px] p-[7px]"
       >
-        <div className="flex min-w-0 items-center gap-2.5">
-          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[3px] border border-primary bg-surface">
-            <img
-              alt=""
-              aria-hidden="true"
-              className="h-8 w-8 object-contain"
-              src={nodalLogoUrl}
-            />
+        <button
+          aria-label="NODAL home"
+          className="liquid-brand group flex h-[52px] shrink-0 cursor-pointer items-center gap-3 rounded-[22px] border-0 bg-transparent pr-3 pl-1.5 text-left focus-visible:ring-2 focus-visible:ring-primary/55 focus-visible:outline-none max-[620px]:hidden"
+          type="button"
+          onClick={() => onNavigate('overview')}
+        >
+          <span className="brand-mark inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[16px] border border-primary/25 bg-surface/55 shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_6px_16px_rgba(89,60,39,0.08)]">
+            <img alt="" aria-hidden="true" className="h-8 w-8 object-contain" src={nodalLogoUrl} />
           </span>
-          <div className={`${collapsed ? 'hidden' : 'block'} min-w-0 max-[900px]:hidden`}>
-            <strong className="block text-[15px] font-bold tracking-[0.13em] text-primary">
+          <span className="max-[1120px]:hidden">
+            <strong className="block font-display text-[22px] leading-none font-extrabold tracking-[0.055em] text-primary">
               NODAL
             </strong>
-            <small className="mt-0.5 block text-[9px] font-semibold tracking-[0.08em] text-dim uppercase">
-              Solana Operations
-            </small>
-          </div>
-        </div>
-        <button
-          aria-label={collapsed ? 'Expand menu' : 'Collapse menu'}
-          className={`${collapsed ? 'hidden' : 'inline-flex'} h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-[9px] border border-transparent bg-transparent text-faint transition hover:bg-raised hover:text-primary focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none max-[900px]:hidden`}
-          type="button"
-          onClick={onCollapse}
-        >
-          {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+          </span>
         </button>
-      </div>
-      <nav className="mt-4 flex flex-col gap-1">
+        <span
+          aria-hidden="true"
+          className="mx-0.5 h-7 w-px shrink-0 bg-line-soft max-[620px]:hidden"
+        />
         {primaryNavItems.map((item) => (
-          <SidebarNavItem
+          <BottomNavItem
             active={activePage === item.id}
-            collapsed={collapsed}
             item={item}
             key={item.id}
             onNavigate={onNavigate}
           />
         ))}
-      </nav>
-      <div className="mt-auto border-t border-line-soft pt-3">
-        <SidebarNavItem
+        <span aria-hidden="true" className="mx-0.5 h-7 w-px shrink-0 bg-line-soft" />
+        <BottomNavItem
           active={activePage === settingsNavItem.id}
-          collapsed={collapsed}
           item={settingsNavItem}
           onNavigate={onNavigate}
         />
-        <button
-          aria-label="Expand menu"
-          className={`${collapsed ? 'mt-2 inline-flex' : 'hidden'} h-10 w-full cursor-pointer items-center justify-center rounded-[9px] border border-transparent bg-transparent text-faint transition hover:bg-raised hover:text-primary focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none max-[900px]:hidden`}
-          type="button"
-          onClick={onCollapse}
-        >
-          <PanelLeftOpen size={18} />
-        </button>
-      </div>
-    </aside>
+      </nav>
+    </div>
   );
 }
 
@@ -3201,7 +3179,6 @@ function App() {
   const [activePage, setActivePage] = useState<PageId>(getInitialPage);
   const [operationMode, setOperationMode] = useState<OperationMode>(getInitialOperationMode);
   const [transferSourceId, setTransferSourceId] = useState('');
-  const [collapsed, setCollapsed] = useState(false);
   const [state, setState] = useState<WalletState | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -3342,6 +3319,7 @@ function App() {
         onNavigate={navigate}
         onOpenOperation={openOperation}
         onRetry={() => void loadState(true)}
+        onTransfer={startTransfer}
       />
     ) : activePage === 'wallets' ? (
       <WalletsPage
@@ -3374,25 +3352,17 @@ function App() {
   ) : null;
 
   return (
-    <div
-      className={`grid min-h-screen bg-app font-sans text-ink transition-[grid-template-columns] duration-200 ${collapsed ? 'grid-cols-[72px_minmax(0,1fr)]' : 'grid-cols-[248px_minmax(0,1fr)]'} max-[900px]:grid-cols-[72px_minmax(0,1fr)]`}
-    >
-      <Sidebar
-        activePage={activePage}
-        collapsed={collapsed}
-        onCollapse={() => setCollapsed((value) => !value)}
-        onNavigate={navigate}
-      />
+    <div className="min-h-screen bg-app font-sans text-ink">
       <main className="min-w-0">
         {loadError && !state ? (
           <div className="mx-auto flex min-h-screen max-w-[560px] flex-col items-center justify-center px-6 text-center">
-            <span className="inline-flex h-14 w-14 items-center justify-center rounded-[12px] bg-danger/10 text-danger">
+            <span className="inline-flex h-14 w-14 items-center justify-center rounded-[22px] bg-danger/10 text-danger">
               <TriangleAlert size={28} />
             </span>
             <h1 className="mt-4 text-[28px] font-bold tracking-[-0.03em] text-ink">
               Could not open NODAL
             </h1>
-            <p className="mt-2 text-[13px] leading-5 text-dim">{loadError}</p>
+            <p className="mt-2 text-sm leading-5 text-dim">{loadError}</p>
             <Button
               className="mt-5"
               icon={RefreshCw}
@@ -3402,24 +3372,27 @@ function App() {
             >
               Retry connection
             </Button>
-            <code className="mt-4 rounded-[8px] bg-raised px-3 py-2 font-mono text-xs text-faint">
+            <code className="mt-4 rounded-[16px] bg-raised px-3 py-2 font-mono text-xs text-faint">
               pip install -r requirements.txt
             </code>
           </div>
         ) : loading && !state ? (
-          <div className="flex min-h-screen flex-col items-center justify-center gap-3 text-[13px] text-dim">
-            <span className="inline-flex h-12 w-12 items-center justify-center rounded-[11px] border border-primary/25 bg-primary/15 text-primary">
+          <div className="flex min-h-screen flex-col items-center justify-center gap-3 text-sm text-dim">
+            <span className="inline-flex h-12 w-12 items-center justify-center rounded-[18px] border border-primary/25 bg-primary/15 text-primary">
               <Sparkles size={25} />
             </span>
             <LoaderCircle className="animate-spin text-primary" size={24} />
             <p>Connecting to the local operations desk…</p>
           </div>
         ) : (
-          <div className="mx-auto w-full max-w-[1540px] px-7 py-6 max-[680px]:px-4 max-[680px]:py-5">
-            {content}
+          <div className="mx-auto w-full max-w-[1540px] px-[84px] pt-7 pb-32 max-[680px]:px-8 max-[680px]:pt-5 max-[680px]:pb-28">
+            <div className="page-enter" key={activePage}>
+              {content}
+            </div>
           </div>
         )}
       </main>
+      <BottomNav activePage={activePage} onNavigate={navigate} />
       {preview ? (
         <PreviewDialog
           preview={preview}
@@ -3445,7 +3418,7 @@ function App() {
       {toast ? (
         <div
           aria-live={toast.tone === 'error' ? 'assertive' : 'polite'}
-          className={`fixed right-6 bottom-6 z-[120] flex min-h-12 max-w-[420px] items-center gap-2.5 rounded-[10px] border bg-surface px-3.5 py-3 text-[13px] font-medium shadow-[0_18px_55px_rgba(0,0,0,0.35)] ${toast.tone === 'success' ? 'border-primary/30 text-copy' : 'border-danger/30 text-danger'}`}
+          className={`fixed right-6 bottom-24 z-[120] flex min-h-12 max-w-[420px] items-center gap-3 rounded-[16px] border bg-surface px-4 py-3 text-sm font-medium shadow-[0_18px_55px_rgba(0,0,0,0.35)] max-[680px]:right-3 max-[680px]:left-3 ${toast.tone === 'success' ? 'border-primary/30 text-copy' : 'border-danger/30 text-danger'}`}
           role={toast.tone === 'error' ? 'alert' : 'status'}
         >
           <span className={toast.tone === 'success' ? 'text-primary' : 'text-danger'}>
