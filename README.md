@@ -1,60 +1,61 @@
 # NODAL
 
-**NODAL** is a local-first Solana operations desk with an Electron desktop app and an interactive Python CLI. It connects directly to Solana RPC endpoints, keeping private keys inside the local Python process rather than returning them to the UI.
+**A local-first Solana operations desk for people who need to inspect, organize, and move assets across multiple wallets without sending private keys to a hosted service.**
 
-## Highlights
+[Source](https://github.com/eerinessofsilence/sol_cli_wallet) · [Configuration](.env.example)
 
-- Import Base58 and JSON-array private keys
-- View SOL, SPL token, and NFT balances
-- Send SOL, tokens, and NFTs with an amount and fee review before signing
-- Run batch distributions, wallet consolidation, and balance equalization
-- Search wallets, import CSV files, and check RPC health from the desktop app
-- Configure the active RPC endpoint and wallet file through `.env`
+![NODAL desktop overview](docs/images/overview.jpg)
 
-## Stack
+> **Status:** functional desktop and CLI prototype. Use devnet and disposable wallets first; this software has not received an independent security audit.
 
-- Python 3.11+
-- Electron + React desktop interface
-- Solana RPC
+## What it delivers
 
-## Start the CLI
+- Imports Base58 keys and JSON key arrays into a searchable local wallet list.
+- Shows SOL, SPL token, and NFT balances from the selected RPC endpoint.
+- Reviews amount and fees before signing SOL, token, or NFT transfers.
+- Runs batch distribution, consolidation, and balance-equalization workflows.
+- Checks RPC health and imports wallet records from CSV.
+- Keeps signing material inside the local Python process instead of returning it to the renderer.
+
+## Data flow
+
+```mermaid
+flowchart LR
+    U[Operator] --> E[Electron + React]
+    E -->|localhost only| P[Python backend]
+    C[(Local CSV / env)] --> P
+    P -->|signed RPC requests| S[Solana RPC]
+    P -. private keys never returned .-> E
+```
+
+## Quick start
 
 ```bash
-git clone https://github.com/eerinessofsilence/sol_cli_wallet
+git clone https://github.com/eerinessofsilence/sol_cli_wallet.git
 cd sol_cli_wallet
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-python3 main.py
-```
-
-Create or select the wallet CSV referenced by `CSV_FILE` in `.env`. The expected header is:
-
-```csv
-name,pubkey,privkey
-```
-
-## Start the Desktop App
-
-```bash
-cd desktop-ui
-npm install
-cd ..
+cd desktop-ui && npm install && cd ..
 python3 run_desktop.py
 ```
 
-Build the desktop renderer:
+The desktop window should open and show the Overview screen. Point `CSV_FILE` in `.env` to a CSV with the header `name,pubkey,privkey`; use the interactive CLI with `python3 main.py`.
+
+## Checks, security, and limits
 
 ```bash
 cd desktop-ui
+npm run typecheck
 npm run build
 ```
 
-The desktop backend binds only to `127.0.0.1` and uses the same `.env` and wallet CSV file as the CLI.
+- Never commit `.env` or wallet CSV files; both may contain signing material.
+- The backend binds to `127.0.0.1`, but the host machine and chosen RPC endpoint remain part of the trust boundary.
+- There is no hardware-wallet integration, encrypted keystore, reproducible release, or external audit yet.
+- Always verify addresses, network, assets, and fees before signing a transaction.
 
-## Security
+## License
 
-- Never commit `.env` files or wallet CSV files containing private keys.
-- Protect the computer running NODAL and use a trusted RPC endpoint.
-- Always review transaction details before signing.
+The repository is public for portfolio and evaluation purposes. No open-source license is currently included.
